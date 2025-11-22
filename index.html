@@ -2290,8 +2290,8 @@ const commonSkills = {
   skill1: { id: "skill1", name: "집중", unlockLevel: 3, cost: 10, img: "images/skill1.png", effectImg: "images/skill1-effect.png", desc: `MP ${10} 소비. 1회에 한해 치명타 확률 100%로 증가.` },
   skill2: { id: "skill2", name: "응급처치", unlockLevel: 5, cost: 20, img: "images/skill2.png", effectImg: "images/skill2-effect.png", desc: `MP ${20} 소비. 최대 체력의 50%를 즉시 회복.` },
   skill3: { id: "skill3", name: "물풍선", unlockLevel: 7, cost: 30, img: "images/skill3.png", effectImg: "images/skill3-effect.png", desc: `MP ${30} 소비. 1턴간 몬스터 기절.` },
-  skill4: { id: "skill4", name: "독극물", unlockLevel: 9, cost: 50, img: "images/skill4.png", effectImg: "images/skill4-effect.png", desc: `MP ${50} 소비. 2턴간 매 턴 몬스터 최대 HP의 10% 피해. (재사용 2턴)` },
-  skill5: { id: "skill5", name: "각성", unlockLevel: 12, cost: 100, img: "images/skill5.png", effectImg: "images/skill5-effect.png", desc: `MP ${100} 소비. HP 30% 미만일 때, 다음 1회 공격력 100% 증가.` }
+skill4: { id: "skill4", name: "독극물", unlockLevel: 9, cost: 50, img: "images/skill4.png", effectImg: "images/skill4-effect.png", desc: `MP ${50} 소비. 2턴간 몬스터를 중독시켜, 공격 시 입힌 피해의 50% 추가 타격. (재사용 2턴)` },
+  skill5: { id: "skill5", name: "각성", unlockLevel: 12, cost: 100, img: "images/skill5.png", effectImg: "images/skill5-effect.png", desc: `MP ${100} 소비. 몬스터 HP 30% 미만일 때, 다음 1회 공격력 100% 증가.` }
 };
 
 /* --- 무기 데이터 --- */
@@ -3244,6 +3244,7 @@ function loadFromLocal(showLog){
     if(player.ownedBottoms === undefined) player.ownedBottoms = [];
     if(player.ownedShields === undefined) player.ownedShields = [];
     if(player.dailyHistory === undefined) player.dailyHistory = {};
+     monsterDebuffs = { stunned: 0, poison: 0 };
     if(player.skillCooldowns === undefined) player.skillCooldowns = { skill4: 0, skill5: 0 };
     renderPlayer(); renderMissions(); renderWeeklyMissions(); 
     if(showLog) log("불러오기 완료.");
@@ -3571,9 +3572,16 @@ function updateBattleUI(){
 
 
 
+
+let battleTimeout = null; // ★ 타임아웃 관리 변수 추가 (전역 또는 상단에 선언 권장하지만, 여기서는 함수 밖 전역변수로 가정)
+
 function handleAttack() {
     if (!isPlayerTurn || player.hp <= 0 || monster.hp <= 0) return;
-    setPlayerButtons(false); // ★ 턴 종료
+    
+    // 기존 예약된 타임아웃이 있다면 취소 (중복 방지)
+    if (battleTimeout) clearTimeout(battleTimeout);
+
+    setPlayerButtons(false); // 턴 종료
 
     const pEff = document.getElementById("playerEffect"), mImg = document.getElementById("monImg");
     let isCrit = Math.random() * 100 < player.crit, critMsg = "";
@@ -3582,38 +3590,45 @@ function handleAttack() {
     const w = shopWeapons.find(x => x.id === player.weapon) || { atk: 0 }, tAtk = getTitleStatBonus('atk'), totalAtk = player.baseAtk + (w ? w.atk : 0) + tAtk;
     const rawDmg = Math.floor(totalAtk + (isCrit ? Math.floor(totalAtk * 0.25) : 0));
 
-    // --- (A) 몬스터 반격 로직 (미리 함수로 정의) ---
+    // --- (A) 몬스터 반격 로직 ---
     const monsterCounterAttack = () => {
-        setTimeout(() => {
-            const pImg = document.getElementById("playerImg");
-            if (monsterDebuffs.stunned > 0) { monsterDebuffs.stunned--; battleMsg("몬스터 기절!"); showMonsterEffect('', 0); startPlayerTurn(); return; }
-            
-            const isMCrit = Math.random() * 100 < monster.crit, mRawDmg = monster.atk + (isMCrit ? Math.floor(monster.atk * 0.5) : 0);
-            const tDef = player.def + getTitleStatBonus('def'), mDmg = Math.max(1, mRawDmg - tDef);
-            player.hp = Math.max(0, player.hp - mDmg); 
-            battleMsg(`몬스터 반격! ${isMCrit ? "치명타! " : ""}플레이어 ${mDmg} 피해.`);
-            showDamagePopup('player', mDmg, isMCrit ? 'critical' : 'normal');
-            playSound('punch.mp3');
+        const pImg = document.getElementById("playerImg");
+        
+        // 기절 체크
+        if (monsterDebuffs.stunned > 0) { 
+            monsterDebuffs.stunned--; 
+            battleMsg("몬스터 기절!"); 
+            showMonsterEffect('', 0); // 기절 이펙트 제거
+            startPlayerTurn(); 
+            return; 
+        }
+        
+        // 몬스터 공격
+        const isMCrit = Math.random() * 100 < monster.crit, mRawDmg = monster.atk + (isMCrit ? Math.floor(monster.atk * 0.5) : 0);
+        const tDef = player.def + getTitleStatBonus('def'), mDmg = Math.max(1, mRawDmg - tDef);
+        player.hp = Math.max(0, player.hp - mDmg); 
+        battleMsg(`몬스터 반격! ${isMCrit ? "치명타! " : ""}플레이어 ${mDmg} 피해.`);
+        showDamagePopup('player', mDmg, isMCrit ? 'critical' : 'normal');
+        playSound('punch.mp3');
 
-            if (pImg) { const pSC = isMCrit ? "shake-crit" : "shake-normal"; pImg.classList.add(pSC); setTimeout(() => pImg.classList.remove(pSC), 500); }
-            
-            updateBattleUI(); // ★ 몬스터 반격 후 UI 갱신
+        if (pImg) { const pSC = isMCrit ? "shake-crit" : "shake-normal"; pImg.classList.add(pSC); setTimeout(() => pImg.classList.remove(pSC), 500); }
+        
+        updateBattleUI();
 
-            // '독극물' 턴 감소 (몬스터 턴 종료 시)
-            if (monsterDebuffs.poison > 0) {
-                monsterDebuffs.poison--; // 턴 감소
-                battleMsg(`[독극물] 효과가 ${monsterDebuffs.poison}턴 남았습니다.`);
-                if (monsterDebuffs.poison <= 0 && monsterDebuffs.stunned <= 0) { // 독이 끝났으면 이펙트 제거
-                    showMonsterEffect('', 0);
-                }
+        // ★ 독 턴 감소 (몬스터 턴 종료 시 1회만)
+        if (monsterDebuffs.poison > 0) {
+            monsterDebuffs.poison--; 
+            battleMsg(`[독극물] 효과가 ${monsterDebuffs.poison}턴 남았습니다.`);
+            if (monsterDebuffs.poison <= 0) { 
+                showMonsterEffect('', 0); // 독 종료 시 이펙트 제거
             }
-            
-            if (player.hp <= 0) { playSound('monsterlose.mp3'); gameOver(); } else { startPlayerTurn(); } // ★ 패배/턴 시작
-        }, 1000); // 몬스터 반격은 항상 1초 딜레이
+        }
+        
+        if (player.hp <= 0) { playSound('monsterlose.mp3'); gameOver(); } else { startPlayerTurn(); }
     };
     
-    // --- (B) 1. 기본 공격 (즉시 실행) ---
-    let finalDmg = Math.max(1, rawDmg - monster.def); // <-- 1차 데미지 계산
+    // --- (B) 1. 기본 공격 (즉시) ---
+    let finalDmg = Math.max(1, rawDmg - monster.def);
     if (playerBuffs.awakened) {
         finalDmg *= 2; 
         critMsg += "[각성] ";
@@ -3625,48 +3640,43 @@ function handleAttack() {
     battleMsg(`플레이어 ${critMsg}공격! ${isCrit ? "치명타! " : ""}몬스터 ${finalDmg} 피해.`);
     showDamagePopup('monster', finalDmg, isCrit ? 'critical' : 'normal'); 
     playSound(`weapon${player.weapon}.mp3`);
-    showMonsterEffect(`images/weapon${player.weapon}-effect.png`, 500, 10); // (이펙트 시간 0.5초로 줄임)
+    showMonsterEffect(`images/weapon${player.weapon}-effect.png`, 500, 10);
 
     if (mImg) { const sC = isCrit ? "shake-crit" : "shake-normal"; mImg.classList.add(sC); setTimeout(() => mImg.classList.remove(sC), 1000); }
-    updateBattleUI(); // ★ 1차 UI 갱신
+    updateBattleUI(); 
 
-    if (monster.hp <= 0) { monster.hp = 0; playSound('monsterwin.mp3'); winBattle(); return; } // ★ 1차 공격으로 죽었는지 확인
+    if (monster.hp <= 0) { monster.hp = 0; playSound('monsterwin.mp3'); winBattle(); return; }
 
     // --- (C) 2. 독극물 추가 타격 (0.6초 후) ---
     if (monsterDebuffs.poison > 0) {
-        setTimeout(() => { // 딜레이 시작
-            
-            // ▼▼▼ 여기가 핵심 수정 부분입니다 ▼▼▼
-            // (1차로 입힌) finalDmg의 20%를 계산합니다.
-            const poisonDmg = Math.floor(finalDmg * 0.2); 
-            // ▲▲▲ 여기가 핵심 수정 부분입니다 ▲▲▲
+        battleTimeout = setTimeout(() => { 
+            const poisonDmg = Math.floor(finalDmg * 0.5);
 
             if (poisonDmg > 0) {
                 monster.hp = Math.max(0, monster.hp - poisonDmg);
                 battleMsg(`[독극물] 추가 타격! -${poisonDmg} HP`);
-                showDamagePopup('monster', poisonDmg, 'normal'); // 2. 추가 독 데미지 팝업
-                playSound('punch_poison.mp3'); // (추가 타격 효과음)
-                showMonsterEffect(`images/weapon${player.weapon}-effect.png`, 500, 10); // 무기 이펙트
+                showDamagePopup('monster', poisonDmg, 'normal'); 
+                playSound('punch_poison.mp3'); // 효과음 (파일 확인 필요)
+                showMonsterEffect(`images/weapon${player.weapon}-effect.png`, 500, 10); 
             }
-            updateBattleUI(); // ★ 2차 UI 갱신
+            updateBattleUI(); 
 
-            if (monster.hp <= 0) { // ★ 2차 공격(독)으로 죽었는지 확인
+            if (monster.hp <= 0) { 
                 monster.hp = 0; 
                 playSound('monsterwin.mp3'); 
                 winBattle(); 
                 return;
             }
 
-            // --- (D) 3. 몬스터 반격 (1.2초 후) ---
-            setTimeout(monsterCounterAttack, 300); // 독 타격 0.6초 후 (총 1.2초 후) 반격
+            // 독 타격 후 0.6초 뒤 몬스터 반격
+            battleTimeout = setTimeout(monsterCounterAttack, 600); 
 
-        }, 600); // 0.6초 딜레이 후 추가 타격
+        }, 600); 
     } else {
-        // 독이 없으면, 1초 뒤 몬스터 반격
-        setTimeout(monsterCounterAttack, 100); // 딜레이 1초
+        // 독 없으면 1초 뒤 몬스터 반격
+        battleTimeout = setTimeout(monsterCounterAttack, 1000); 
     }
 }
-
 
 function handleHpPotion() {
   if(!isPlayerTurn) return; if((player.potions||0)<=0){battleMsg("HP 물약 없음"); return;} 
@@ -3748,26 +3758,26 @@ function handleSkill5() { // [각성]
   if(!isPlayerTurn||!player.unlockedSkills.includes('skill5'))return; 
   const skill=commonSkills.skill5, btn=document.getElementById("commonSkillBtn5");
 
-  // HP 조건 검사를 위해 현재 최대 HP 계산
-  const t = shopTops.find(x=>x.id===player.equippedTop);
-  const tMaxHp = player.maxHp + (t? t.hp : 0) + getTitleStatBonus('hp');
-
-  if (player.hp >= tMaxHp * 0.3) {
-      battleMsg("[각성]은 HP가 30% 미만일 때만 사용 가능합니다.");
+  // ▼▼▼ 수정된 조건문 ▼▼▼
+  // 몬스터 HP가 30% 이상이면 사용 불가
+  if (monster.hp >= monster.maxHp * 0.9) {
+      battleMsg("[각성]은 몬스터 HP가 30% 미만일 때만 사용 가능합니다.");
       return; // 턴 소모 없음
   }
+  // ▲▲▲ 수정 완료 ▲▲▲
+
   if(player.mp<skill.cost){battleMsg("MP 부족"); return;} // 턴 소모 없음
 
   player.mp-=skill.cost;
   playerBuffs.awakened = true; // 각성 버프 활성화
   
-  showPlayerEffect(skill.effectImg, -1, 0); // 플레이어에게 각성 이펙트
+  showPlayerEffect(skill.effectImg, -1, 0); // 플레이어에게 각성 이펙트 (뒤쪽)
   battleMsg("🔥 [각성] 시전! 다음 공격이 증폭됩니다!"); 
-  playSound('skill5.mp3'); // (임시 효과음, skill5.mp3로 변경 권장)
+  playSound('skill5.mp3'); 
   updateBattleUI();
 }
 
-// ▲▲▲ 여기까지 추가 ▲▲▲
+
 
 
 /* 수정: 도망가기 (결과 팝업 호출) */
@@ -4050,11 +4060,13 @@ function init(){
     document.getElementById("totalResetBtn").addEventListener("click", totalReset); 
     log("게임 시작. sounds/ 폴더에 효과음 파일을 넣어주세요.");
 }
-init();
+
 /* ------------------------
    모달 닫기 처리
    ------------------------ */
 document.getElementById("equipmentModal").addEventListener("click", (e)=>{ if(e.target === equipmentModal) closeEquipmentWindow(); }); // ★ 추가
+
+init();
 </script>
 
 
