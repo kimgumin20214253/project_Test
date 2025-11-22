@@ -1647,6 +1647,145 @@ body {
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* 그림자 효과 */
     z-index: 10; /* 이미지 위에 오도록 */
 }
+
+/* ====================================
+   스탯 포인트 시스템 (신규)
+   ==================================== */
+.stat-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    color: #555;
+}
+
+.stat-up-btn {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1px solid #888;
+    background-color: #fff;
+    color: #333;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0;
+    line-height: 16px; /* 수직 중앙 정렬 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-up-btn:hover {
+    background-color: #eee;
+    border-color: #333;
+}
+
+.stat-up-btn:disabled {
+    background-color: #e0e0e0;
+    color: #aaa;
+    border-color: #ccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* ====================================
+   📱 모바일 반응형 스타일 (화면 폭 768px 이하)
+   ==================================== */
+@media (max-width: 768px) {
+
+    /* 1. 사이드바를 하단 내비게이션 바로 변경 */
+    #sidebar {
+        width: 100%;
+        height: 60px;
+        bottom: 0;
+        top: auto;
+        left: 0;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        padding: 0;
+        z-index: 1000;
+    }
+
+    #sidebar .nav-btn {
+        height: 100%;
+        width: auto;
+        flex: 1;
+        margin: 0;
+        border-radius: 0;
+        padding: 5px 0;
+    }
+    
+    #sidebar .nav-btn img {
+        width: 24px;
+        height: 24px;
+        margin-bottom: 2px;
+    }
+    
+    #sidebar .nav-btn span {
+        font-size: 10px;
+    }
+
+    /* 2. 메인 콘텐츠 영역 조정 */
+    #main-content {
+        margin-left: 0; /* 사이드바 공간 제거 */
+        margin-bottom: 60px; /* 하단 바 공간 확보 */
+        padding: 10px;
+        min-height: calc(100vh - 60px);
+    }
+
+    /* 3. '내 정보' 탭 레이아웃 조정 */
+    #info-middle-section {
+        flex-direction: column; /* 세로 정렬로 변경 */
+        gap: 20px;
+    }
+    
+    #info-middle-section .character-box {
+        /* 캐릭터 박스 크기 유지 또는 약간 축소 */
+        transform: scale(0.9); 
+    }
+
+    #info-equip-slots, #info-potion-slots {
+        flex-direction: row; /* 장비/물약 슬롯을 가로로 */
+        gap: 10px;
+    }
+
+    /* 4. 스탯 박스 크기 조정 */
+    .info-box-stat {
+        min-width: 30%; /* 한 줄에 3개씩 나오도록 */
+        font-size: 12px;
+        padding: 5px;
+    }
+    
+    /* 5. 미션/던전/상점 등 기타 조정 */
+    .mission-grid {
+        grid-template-columns: 1fr; /* 미션 목록 1열로 */
+    }
+    
+    .stats-top-row, .stats-bottom-row {
+        flex-direction: column; /* 통계 박스 세로 정렬 */
+    }
+    
+    .dungeon-info-box {
+        padding: 5px;
+    }
+    
+    .profile-pic {
+        width: 40px;
+        height: 40px;
+    }
+    
+    /* 6. 글씨 크기 전반적 축소 */
+    body {
+        font-size: 14px;
+    }
+    h2 {
+        font-size: 20px;
+    }
+}
+	
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> </head>
@@ -1733,8 +1872,9 @@ body {
             <div class="info-skill-slot" id="info-skill-5" title="(비어있음)"></div>
         </div>
 
-        <div id="info-level-box">
+<div id="info-level-box" style="position: relative;">
             <span id="levelTag">Lv.1 초보자</span>
+            <span id="spDisplay" style="font-size: 14px; color: #ff5722; margin-left: 10px; font-weight: bold;">(SP: 0)</span>
         </div>
 
         <div id="info-xp-section">
@@ -1746,19 +1886,24 @@ body {
 
         <div id="info-stats-row">
             <div class="info-box-stat info-box-hp">
-                HP <span id="hpTextMain">0/0</span>
+                <div class="stat-header">HP <button class="stat-up-btn" onclick="investStat('hp')">+</button></div>
+                <span id="hpTextMain">0/0</span>
             </div>
             <div class="info-box-stat info-box-mp">
-                MP <span id="mpTextMain">0/0</span>
+                <div class="stat-header">MP <button class="stat-up-btn" onclick="investStat('mp')">+</button></div>
+                <span id="mpTextMain">0/0</span>
             </div>
             <div class="info-box-stat">
-                공격력 <span id="atkText">0</span>
+                <div class="stat-header">공격력 <button class="stat-up-btn" onclick="investStat('atk')">+</button></div>
+                <span id="atkText">0</span>
             </div>
             <div class="info-box-stat">
-                방어력 <span id="defText">0</span>
+                <div class="stat-header">방어력 <button class="stat-up-btn" onclick="investStat('def')">+</button></div>
+                <span id="defText">0</span>
             </div>
             <div class="info-box-stat">
-                치명타 <span id="critText">0%</span>
+                <div class="stat-header">치명타 <button class="stat-up-btn" onclick="investStat('crit')">+</button></div>
+                <span id="critText">0%</span>
             </div>
         </div>
 
@@ -1982,7 +2127,7 @@ body {
                 <div style="margin:10px 0;">
                     <button class="btn" id="saveBtn">저장</button>
                     <button class="btn" id="loadBtn">불러오기</button>
-                    <button class="btn" id="backBtn">뒤로가기</button>
+                    
                 </div>
                 <div style="margin-top:12px;font-size:13px;color:#555;">
 
@@ -2228,7 +2373,8 @@ let player = {
   dungeonLevel: 1,
   claimedWeeklyMissions: [],
   dailyHistory: {},
-  skillCooldowns: { skill4: 0, skill5: 0 } // ✅ 이 줄을 추가하세요
+  skillCooldowns: { skill4: 0, skill5: 0 },
+  statPoints: 0
 };
 let dungeonRunStats = null; // 던전 결과 추적용 (던전 입장 시 초기화)
 let playerDiedInDungeon = false; // 플레이어 사망 여부 플래그
@@ -2557,7 +2703,30 @@ function renderMissions(){
 }
 
 
+// ▼▼▼ 스탯 투자 함수 (신규) ▼▼▼
+function investStat(type) {
+    if (player.statPoints <= 0) return; // 포인트 없으면 중단
 
+    player.statPoints--; // 포인트 1 소모
+
+    if (type === 'atk') {
+        player.baseAtk += 1;
+    } else if (type === 'def') {
+        player.def += 1;
+    } else if (type === 'crit') {
+        player.crit = parseFloat((player.crit + 0.1).toFixed(1)); // 부동소수점 오류 방지
+    } else if (type === 'hp') {
+        player.maxHp += 3;
+        player.hp += 3; // 현재 체력도 같이 회복
+    } else if (type === 'mp') {
+        player.maxMp += 1;
+        player.mp += 1; // 현재 MP도 같이 회복
+    }
+
+    playSound('click.mp3'); // 효과음 (클릭음 사용)
+    renderPlayer(); // UI 갱신
+    saveToLocal(); // 저장
+}
 
 
 // ▼▼▼ function renderPlayer() { ... }의 내용물 전체를 이걸로 교체! ▼▼▼
@@ -2638,6 +2807,13 @@ function renderPlayer(){
         document.getElementById('equipLayer_Top').src = topPath;
         document.getElementById('equipLayer_Bottom').src = bottomPath;
         document.getElementById('equipLayer_Shield').src = shieldPath;
+
+
+        document.getElementById('equipSlot_Top').style.backgroundImage = t ? `url('${t.shopImg}')` : 'none';
+        document.getElementById('equipSlot_Bottom').style.backgroundImage = b ? `url('${b.shopImg}')` : 'none';
+        document.getElementById('equipSlot_Weapon').style.backgroundImage = w ? `url('${w.shopImg}')` : 'none';
+        document.getElementById('equipSlot_Shield').style.backgroundImage = s ? `url('${s.shopImg}')` : 'none';
+
     }
 
     // 2. 장비 슬롯 (새 ID)
@@ -2665,9 +2841,16 @@ function renderPlayer(){
             el.title = '(비어있음)';
         }
     });
-
-    // (기존 allCount ID는 삭제됨)
-    // document.getElementById("allCount").textContent = player.allClear;
+	
+// ▼▼▼ 스탯 포인트 UI 갱신 (신규) ▼▼▼
+    document.getElementById("spDisplay").textContent = `(SP: ${player.statPoints})`;
+    
+    const statButtons = document.querySelectorAll('.stat-up-btn');
+    statButtons.forEach(btn => {
+        // 포인트가 있으면 활성화(disabled=false), 없으면 비활성화(disabled=true)
+        btn.disabled = (player.statPoints <= 0);
+    });
+    // ▲▲▲ 여기까지 추가 ▲▲▲
 }
 
 
@@ -2691,8 +2874,20 @@ function checkLevelUp() {
   while (player.xp >= need) {
     player.xp -= need;
     player.level++;
-    player.maxHp += 5;
-    player.maxMp += 5;
+
+// ▼▼▼ 스탯 포인트 지급 로직 (신규) ▼▼▼
+    let spGain = 0;
+    if (player.level <= 10) spGain = 5;
+    else if (player.level <= 20) spGain = 10;
+    else if (player.level <= 30) spGain = 15;
+    else if (player.level <= 40) spGain = 20;
+    else spGain = 25; // 41레벨 이상
+
+    player.statPoints += spGain;
+    // ▲▲▲ 여기까지 추가 ▲▲▲
+
+	  
+
     player.hp = player.maxHp;
     player.mp = player.maxMp;
     log(`🎉 레벨 업! Lv.${player.level} 달성!`);
@@ -3251,7 +3446,8 @@ function loadFromLocal(showLog){
     if(player.dailyHistory === undefined) player.dailyHistory = {};
      monsterDebuffs = { stunned: 0, poison: 0 };
     if(player.skillCooldowns === undefined) player.skillCooldowns = { skill4: 0, skill5: 0 };
-    renderPlayer(); renderMissions(); renderWeeklyMissions(); 
+    if(player.statPoints === undefined) player.statPoints = 0;
+	renderPlayer(); renderMissions(); renderWeeklyMissions(); 
     if(showLog) log("불러오기 완료.");
 
   }catch(e){ log("불러오기 실패: " + e.message); }
