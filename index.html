@@ -1785,7 +1785,121 @@ body {
         font-size: 20px;
     }
 }
-	
+
+
+모바일 화면에서 던전 UI가 깨지거나 너무 크게 보이는 문제를 해결하려면, 화면 크기가 줄어들었을 때 요소들의 크기와 배치를 자동으로 조절해주는 CSS 미디어 쿼리가 필요합니다.
+
+현재 코드에는 모바일용 스타일이 빠져 있습니다. 아래의 CSS 코드를 <style> 태그 맨 마지막에 추가해주시면, 모바일에서도 던전 화면이 깔끔하게 최적화되어 보일 것입니다.
+
+📱 모바일 던전 UI 최적화 CSS
+index.html 파일의 <style> 태그 닫히는 곳(</style>) 바로 위에 아래 코드를 붙여넣으세요.
+
+CSS
+
+/* ====================================
+   📱 모바일 반응형 스타일 (화면 폭 768px 이하)
+   ==================================== */
+@media (max-width: 768px) {
+
+    /* [던전] 1. 상단 정보 바 축소 */
+    #dungeon-top-bar {
+        gap: 5px; /* 간격 좁힘 */
+        margin-bottom: 10px;
+    }
+    
+    .dungeon-info-box {
+        padding: 5px; /* 내부 여백 축소 */
+        border-width: 2px;
+    }
+    
+    .profile-pic {
+        width: 40px; /* 프로필 사진 크기 축소 */
+        height: 40px;
+        border-width: 1px;
+    }
+    
+    .stats-details {
+        gap: 2px;
+    }
+    
+    .level-name {
+        font-size: 12px; /* 글자 크기 축소 */
+        margin-bottom: 2px;
+    }
+    
+    .hp-bar, .mp-bar {
+        border-width: 1px;
+        /* 높이는 자동 조절 */
+    }
+    
+    .hp-fill, .mp-fill {
+        height: 14px; /* 게이지 바 높이 축소 */
+    }
+    
+    .hp-bar-text, .mp-bar-text {
+        font-size: 10px;
+        padding: 1px 0;
+    }
+    
+    #vs-sign {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+        border-width: 2px;
+    }
+
+    /* [던전] 2. 전투 캐릭터 이미지 축소 */
+    .battle-box {
+        margin-top: 10px;
+    }
+    
+    .battle-char, .battle-mon {
+        width: 130px; /* 260px -> 130px 로 축소 */
+        height: 130px;
+    }
+
+    /* [던전] 3. 행동 버튼 축소 */
+    .action-row {
+        gap: 10px;
+        margin-top: 15px;
+    }
+    
+    .action-btn {
+        width: 80px; /* 120px -> 80px */
+        height: 80px;
+        font-size: 14px;
+        padding-bottom: 4px;
+    }
+
+    /* [던전] 4. 스킬 버튼 축소 */
+    .common-skill-row {
+        height: 60px;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    
+    .skill-btn {
+        width: 50px; /* 70px -> 50px */
+        height: 50px;
+    }
+
+    /* [던전] 5. 로그창 및 뒤로가기 */
+    .battle-log {
+        width: 95%; /* 너비 꽉 채움 */
+        height: 120px;
+        font-size: 12px;
+        margin-top: 15px;
+    }
+    
+    .escape-btn-corner {
+        width: 32px;
+        height: 32px;
+        font-size: 18px;
+        line-height: 28px;
+        top: 10px;
+        right: 10px;
+    }
+}	
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> </head>
