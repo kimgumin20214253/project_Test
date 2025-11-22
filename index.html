@@ -1787,119 +1787,77 @@ body {
 }
 
 
-모바일 화면에서 던전 UI가 깨지거나 너무 크게 보이는 문제를 해결하려면, 화면 크기가 줄어들었을 때 요소들의 크기와 배치를 자동으로 조절해주는 CSS 미디어 쿼리가 필요합니다.
-
-현재 코드에는 모바일용 스타일이 빠져 있습니다. 아래의 CSS 코드를 <style> 태그 맨 마지막에 추가해주시면, 모바일에서도 던전 화면이 깔끔하게 최적화되어 보일 것입니다.
-
-📱 모바일 던전 UI 최적화 CSS
-index.html 파일의 <style> 태그 닫히는 곳(</style>) 바로 위에 아래 코드를 붙여넣으세요.
-
-CSS
-
 /* ====================================
-   📱 모바일 반응형 스타일 (화면 폭 768px 이하)
+   주간 미션 (2x2 그리드)
    ==================================== */
-@media (max-width: 768px) {
+#weekly-grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 2열 */
+    gap: 15px;
+    padding: 10px;
+}
 
-    /* [던전] 1. 상단 정보 바 축소 */
-    #dungeon-top-bar {
-        gap: 5px; /* 간격 좁힘 */
-        margin-bottom: 10px;
-    }
-    
-    .dungeon-info-box {
-        padding: 5px; /* 내부 여백 축소 */
-        border-width: 2px;
-    }
-    
-    .profile-pic {
-        width: 40px; /* 프로필 사진 크기 축소 */
-        height: 40px;
-        border-width: 1px;
-    }
-    
-    .stats-details {
-        gap: 2px;
-    }
-    
-    .level-name {
-        font-size: 12px; /* 글자 크기 축소 */
-        margin-bottom: 2px;
-    }
-    
-    .hp-bar, .mp-bar {
-        border-width: 1px;
-        /* 높이는 자동 조절 */
-    }
-    
-    .hp-fill, .mp-fill {
-        height: 14px; /* 게이지 바 높이 축소 */
-    }
-    
-    .hp-bar-text, .mp-bar-text {
-        font-size: 10px;
-        padding: 1px 0;
-    }
-    
-    #vs-sign {
-        width: 30px;
-        height: 30px;
-        font-size: 14px;
-        border-width: 2px;
-    }
+.weekly-card {
+    background: #fff;
+    border: 2px solid #ccc;
+    border-radius: 12px;
+    padding: 15px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
 
-    /* [던전] 2. 전투 캐릭터 이미지 축소 */
-    .battle-box {
-        margin-top: 10px;
-    }
-    
-    .battle-char, .battle-mon {
-        width: 130px; /* 260px -> 130px 로 축소 */
-        height: 130px;
-    }
+.weekly-card h4 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+}
 
-    /* [던전] 3. 행동 버튼 축소 */
-    .action-row {
-        gap: 10px;
-        margin-top: 15px;
-    }
-    
-    .action-btn {
-        width: 80px; /* 120px -> 80px */
-        height: 80px;
-        font-size: 14px;
-        padding-bottom: 4px;
-    }
+.weekly-chart-wrapper {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin-bottom: 10px;
+}
 
-    /* [던전] 4. 스킬 버튼 축소 */
-    .common-skill-row {
-        height: 60px;
-        gap: 10px;
-        margin-top: 15px;
-    }
-    
-    .skill-btn {
-        width: 50px; /* 70px -> 50px */
-        height: 50px;
-    }
+.weekly-chart-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
 
-    /* [던전] 5. 로그창 및 뒤로가기 */
-    .battle-log {
-        width: 95%; /* 너비 꽉 채움 */
-        height: 120px;
-        font-size: 12px;
-        margin-top: 15px;
-    }
-    
-    .escape-btn-corner {
-        width: 32px;
-        height: 32px;
-        font-size: 18px;
-        line-height: 28px;
-        top: 10px;
-        right: 10px;
-    }
-}	
+.weekly-reward-btn {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.weekly-reward-btn.active {
+    background-color: #3f51b5;
+    color: white;
+    animation: pulse 1.5s infinite;
+}
+
+.weekly-reward-btn:disabled {
+    background-color: #eee;
+    color: #aaa;
+    cursor: not-allowed;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+	
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> </head>
@@ -1986,7 +1944,8 @@ CSS
             <div class="info-skill-slot" id="info-skill-5" title="(비어있음)"></div>
         </div>
 
-<div id="info-level-box" style="position: relative;">
+<div id="info-level-box" style="display: flex; flex-direction: column; align-items: center;">
+            <div id="equippedTitleDisplay" style="font-size: 16px; font-weight: bold; color: #3f51b5; margin-bottom: 5px; height: 20px;"></div>
             <span id="levelTag">Lv.1 초보자</span>
             <span id="spDisplay" style="font-size: 14px; color: #ff5722; margin-left: 10px; font-weight: bold;">(SP: 0)</span>
         </div>
@@ -2102,8 +2061,8 @@ CSS
             </div>
         </div> <div id="mission-tab-weekly" class="tab-content">
             <div class="weekly-mission-section">
-                <h3>주간 미션</h3>
-                <div id="weeklyMissionList"></div>
+                <h3>주간 미션 (매주 월요일 초기화)</h3>
+                <div id="weekly-grid-container"></div>
             </div>
         </div> </div>
 
@@ -2488,7 +2447,8 @@ let player = {
   claimedWeeklyMissions: [],
   dailyHistory: {},
   skillCooldowns: { skill4: 0, skill5: 0 },
-  statPoints: 0
+  statPoints: 0,
+  weeklyCounts: { exercise: 0, study: 0, diet: 0, rest: 0 }
 };
 let dungeonRunStats = null; // 던전 결과 추적용 (던전 입장 시 초기화)
 let playerDiedInDungeon = false; // 플레이어 사망 여부 플래그
@@ -2558,12 +2518,12 @@ skill4: { id: "skill4", name: "독극물", unlockLevel: 9, cost: 50, img: "image
 /* --- 무기 데이터 --- */
 const shopWeapons = [
   {id:1, shopImg:"images/weapon1.png", img:"images/weapon_1.png", name:"소형막대기 (Lv.1)", atk:0, cost:0},
-  {id:2, shopImg:"images/weapon2.png", img:"images/weapon_2.png", name:"대형막대기 (Lv.2)", atk:5, cost:500},
-  {id:3, shopImg:"images/weapon3.png", img:"images/weapon_3.png", name:"마법지팡이 (Lv.3)", atk:10, cost:2000},
-  {id:4, shopImg:"images/weapon4.png", img:"images/weapon_4.png", name:"용사의 검 I (Lv.4)", atk:20, cost:4000},
-  {id:5, shopImg:"images/weapon5.png", img:"images/weapon_5.png", name:"용사의 검 II (Lv.5)", atk:30, cost:10000},
-  {id:6, shopImg:"images/weapon6.png", img:"images/weapon_6.png", name:"용사의 검 III (Lv.6)", atk:50, cost:30000},
-  {id:7, shopImg:"images/weapon7.png", img:"images/weapon_7.png", name:"용사의 검 IV (Lv.7)", atk:100, cost:50000}
+  {id:2, shopImg:"images/weapon2.png", img:"images/weapon_2.png", name:"대형막대기 (Lv.2)", atk:5, cost:2000},
+  {id:3, shopImg:"images/weapon3.png", img:"images/weapon_3.png", name:"마법지팡이 (Lv.3)", atk:15, cost:5000},
+  {id:4, shopImg:"images/weapon4.png", img:"images/weapon_4.png", name:"용사의 검 I (Lv.4)", atk:40, cost:10000},
+  {id:5, shopImg:"images/weapon5.png", img:"images/weapon_5.png", name:"용사의 검 II (Lv.5)", atk:130, cost:30000},
+  {id:6, shopImg:"images/weapon6.png", img:"images/weapon_6.png", name:"용사의 검 III (Lv.6)", atk:300, cost:70000},
+  {id:7, shopImg:"images/weapon7.png", img:"images/weapon_7.png", name:"용사의 검 IV (Lv.7)", atk:700, cost:150000}
 ];
 
 /* --- 아이템(물약) 데이터 --- */
@@ -2691,104 +2651,104 @@ function generateWeeklyMissions() {
   log("이번 주 주간 미션이 생성되었습니다.");
 }
 
-function renderWeeklyMissions(){
-  const listElement = document.getElementById("weeklyMissionList");
-  listElement.innerHTML = "";
-  player.weeklyMissions.forEach(mission => {
-    const progress = player.weeklyMissionProgress[mission.id] || 0;
-    const percent = Math.min(100, Math.floor((progress / mission.target) * 100));
-    const isComplete = progress >= mission.target;
-    const isClaimed = player.claimedWeeklyMissions.includes(mission.id);
+let weeklyChartInstances = {};
+function renderWeeklyMissions() {
+    const container = document.getElementById("weekly-grid-container");
+    container.innerHTML = "";
 
-    const div = document.createElement("div");
-    div.className = "weekly-mission";
-    if (isClaimed) {
-        div.classList.add("done"); // 취소선
-    } else if (isComplete) {
-        div.classList.add("complete"); // 클릭 가능 (연두색 배경)
-        div.onclick = () => claimWeeklyReward(mission.id);
-    }
+    const categories = [
+        { key: 'exercise', name: '운동', color: '#c8a2c8' }, // 보라
+        { key: 'diet', name: '식단', color: '#ffadad' },     // 빨강
+        { key: 'study', name: '공부', color: '#a0c4ff' },    // 파랑
+        { key: 'rest', name: '휴식', color: '#b0d9b1' }      // 초록
+    ];
 
-    div.innerHTML = `
-      <div>${mission.name}</div>
-      <div class="progress-bar-container">
-        <div class="progress-bar-fill" style="width: ${percent}%;"></div>
-      </div>
-      <div class="progress-text">${progress}/${mission.target}</div>`;
-    listElement.appendChild(div);
-  });
+    categories.forEach(cat => {
+        const current = player.weeklyCounts[cat.key] || 0;
+        const target = 20;
+        const isClaimed = player.claimedWeeklyMissions.includes(cat.key);
+        const isComplete = current >= target;
+
+        // 카드 HTML 생성
+        const card = document.createElement("div");
+        card.className = "weekly-card";
+        
+        let btnText = isClaimed ? "보상 받기 완료" : (isComplete ? "보상 받기" : `${current}/${target}`);
+        let btnClass = isComplete && !isClaimed ? "weekly-reward-btn active" : "weekly-reward-btn";
+        let btnDisabled = isClaimed || !isComplete ? "disabled" : "";
+
+        card.innerHTML = `
+            <h4>${cat.name}</h4>
+            <div class="weekly-chart-wrapper">
+                <canvas id="weeklyChart_${cat.key}"></canvas>
+                <div class="weekly-chart-text">${current}/${target}</div>
+            </div>
+            <button class="${btnClass}" ${btnDisabled} onclick="claimWeeklyReward('${cat.key}')">${btnText}</button>
+        `;
+        container.appendChild(card);
+
+        // 차트 그리기
+        const ctx = document.getElementById(`weeklyChart_${cat.key}`).getContext('2d');
+        
+        // 기존 차트 있으면 파괴 (메모리 누수 방지)
+        if (weeklyChartInstances[cat.key]) {
+            weeklyChartInstances[cat.key].destroy();
+        }
+
+        weeklyChartInstances[cat.key] = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: [Math.min(current, target), Math.max(0, target - current)],
+                    backgroundColor: [cat.color, '#e0e0e0'],
+                    borderWidth: 0
+                }]
+            },
+            options: { 
+                cutout: '75%', 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                animation: false // 깜빡임 방지
+            }
+        });
+    });
 }
 
-
-// ★★★ 신규: 주간 미션 보상 수령 함수 ★★★
-function claimWeeklyReward(missionId) {
-    if (!missionId) return;
-    if (player.claimedWeeklyMissions.includes(missionId)) {
-        log("이미 보상을 받았습니다.");
-        return;
-    }
-
-    const missionData = player.weeklyMissions.find(m => m.id === missionId);
-    if (!missionData) return;
-
-    const progress = player.weeklyMissionProgress[missionId] || 0;
-    if (progress < missionData.target) {
-        log("아직 미션을 완료하지 못했습니다.");
-        return;
-    }
-
-    // 1. 보상 풀에서 보상 정보 찾기
-    const pool = weeklyMissionPools[missionData.category];
-    const missionPoolData = pool.find(m => m.id === missionId);
-    const reward = missionPoolData ? missionPoolData.reward : null;
+function claimWeeklyReward(category) {
+    if (player.claimedWeeklyMissions.includes(category)) return;
     
-    if (!reward) {
-        log("오류: 이 미션의 보상 정보를 찾을 수 없습니다.");
-        return;
+    const current = player.weeklyCounts[category] || 0;
+    if (current < 20) return;
+
+    playSound('missioncomplete2.mp3');
+    player.claimedWeeklyMissions.push(category);
+
+    // ★ 10배 보상 설정
+    let rewards = [`🎉 [주간] ${category} 미션 완료!`, `🪙 코인 +800`, `🌟 XP +100`];
+    player.coins += 800;
+    player.xp += 100;
+
+    // 카테고리별 10배 스탯 보상
+    if (category === 'exercise') {
+        player.baseAtk += 10; rewards.push(`⚔️ 공격력 +10`);
+    } else if (category === 'diet') {
+        player.def += 10; rewards.push(`🛡️ 방어력 +10`);
+    } else if (category === 'study') {
+        player.crit = parseFloat((player.crit + 5).toFixed(1)); rewards.push(`💥 치명타 +5%`);
+    } else if (category === 'rest') {
+        player.maxHp += 20; player.hp += 20;
+        player.maxMp += 20; player.mp += 20;
+        rewards.push(`❤️ 최대 체력 +20`);
+        rewards.push(`💧 최대 MP +20`);
     }
 
-    // 2. 보상 적용
-    let rewardsToShow = [`🎉 주간 미션 완료! 🎉`];
-    if (reward.coins) {
-        player.coins += reward.coins;
-        rewardsToShow.push(`🪙 코인 +${reward.coins}`);
-    }
-    if (reward.atk) {
-        player.baseAtk += reward.atk;
-        rewardsToShow.push(`⚔️ 공격력 +${reward.atk}`);
-    }
-    if (reward.def) {
-        player.def += reward.def;
-        rewardsToShow.push(`🛡️ 방어력 +${reward.def}`);
-    }
-    if (reward.crit) {
-        player.crit += reward.crit;
-        rewardsToShow.push(`💥 치명타 +${reward.crit}%`);
-    }
-    if (reward.maxHp) {
-        player.maxHp += reward.maxHp;
-        player.hp += reward.maxHp; // 체력도 채워주기
-        rewardsToShow.push(`❤️ 최대 체력 +${reward.maxHp}`);
-    }
-    if (reward.maxMp) {
-        player.maxMp += reward.maxMp;
-        player.mp += reward.maxMp; // MP도 채워주기
-        rewardsToShow.push(`💧 최대 MP +${reward.maxMp}`);
-    }
-
-    // 3. 보상 수령 처리
-    player.claimedWeeklyMissions.push(missionId);
-    
-    // 4. UI 갱신
-    playSound('missioncomplete.mp3'); // (일일 미션과 동일한 사운드)
-    showRewardPopup(rewardsToShow);
-    log("주간 미션 보상을 받았습니다!");
-
+    showRewardPopup(rewards);
+    checkLevelUp();
     renderPlayer();
-    renderWeeklyMissions();
     saveToLocal();
+    renderWeeklyMissions(); // 버튼 상태 갱신
 }
-
 
 
 // (기존 'renderMissions' 함수)
@@ -2892,9 +2852,14 @@ function renderPlayer(){
     else { playerTitle = "마스터"; }
     document.getElementById("levelTag").textContent = `Lv.${player.level} ${playerTitle}`;
     
-    // (칭호 표시는 HTML에서 제거됨)
-    // const equippedTitleDisplay = document.getElementById("equippedTitleDisplay");
-    // ...
+// ▼▼▼ [추가] 칭호 표시 로직 복구 ▼▼▼
+    const equippedTitleDisplay = document.getElementById("equippedTitleDisplay");
+    if (player.equippedTitle && titles[player.equippedTitle]) {
+        equippedTitleDisplay.textContent = titles[player.equippedTitle].name;
+    } else {
+        equippedTitleDisplay.textContent = ""; // 장착 안 했으면 빈카
+    }
+    // ▲▲▲ 여기까지 추가 ▲▲▲
 
     // 1. 캐릭터 이미지 (ID 재사용)
     let charImg = 'char_1.png'; // 1-10
@@ -3063,7 +3028,7 @@ function completeMission(idx){
     
     const missionCategory = missions[idx].category;
     player.missionCountsByCategory[missionCategory]++; // 카테고리 비율용 카운트
-    
+    player.weeklyCounts[missionCategory]++; // ✅ [신규] 주간 누적 (주간미션용)
     const weeklyMission = player.weeklyMissions.find(wm => wm.category === missionCategory);
     if (weeklyMission) {
         // ... (기존 주간 미션 로직은 그대로 둡니다) ...
@@ -3560,6 +3525,7 @@ function loadFromLocal(showLog){
     if(player.dailyHistory === undefined) player.dailyHistory = {};
      monsterDebuffs = { stunned: 0, poison: 0 };
     if(player.skillCooldowns === undefined) player.skillCooldowns = { skill4: 0, skill5: 0 };
+    if(player.weeklyCounts === undefined) player.weeklyCounts = { exercise: 0, study: 0, diet: 0, rest: 0 };
     if(player.statPoints === undefined) player.statPoints = 0;
 	renderPlayer(); renderMissions(); renderWeeklyMissions(); 
     if(showLog) log("불러오기 완료.");
@@ -3585,8 +3551,10 @@ function checkWeeklyReset() {
   const thisMonday = getThisMondayDate();
   if (player.lastWeeklyReset !== thisMonday) {
     log("새로운 주가 시작되어 주간 미션을 초기화합니다.");
-    generateWeeklyMissions();
-    player.claimedWeeklyMissions = [];
+// ▼▼▼ 초기화 로직 수정 ▼▼▼
+    player.weeklyCounts = { exercise: 0, study: 0, diet: 0, rest: 0 }; // 카운트 0으로 리셋
+    player.claimedWeeklyMissions = []; // 받은 보상 기록 리셋
+    // ▲▲▲ 여기까지 수정 ▲▲▲
     player.lastWeeklyReset = thisMonday;
     saveToLocal();
   }
