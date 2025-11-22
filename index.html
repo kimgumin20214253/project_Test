@@ -1973,7 +1973,6 @@ body {
                 </div>
                 <div style="text-align:right;margin-top:12px;">
                     <button class="btn" id="saveMissionEditsBtn">변경 내용 저장</button>
-                    <button class="btn" onclick="closeEditMissionWindow()">닫기</button>
                 </div>
 
 
@@ -2158,10 +2157,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 타겟 탭 콘텐츠만 보여주기
             document.getElementById(targetId).classList.add('active');
-		if (targetId === 'info-tab-skills') {
+			if (targetId === 'info-tab-skills') {
                 renderSkillList(); // 스킬 탭을 누를 때마다 목록을 새로 그림
             } else if (targetId === 'info-tab-titles') {
                 renderTitleList(); // 칭호 탭을 누를 때마다 목록을 새로 그림
+			} else if (targetId === 'settings-tab-edit') { // ✅ 추가된 부분
+                renderMissionEditTable(); // 미션 수정 탭 클릭 시 테이블 갱신
             }
         });
     });
@@ -3057,7 +3058,11 @@ function unequipTitle(titleId) {
 }
 
 
-document.getElementById("saveMissionEditsBtn").addEventListener("click", saveMissionEdits);
+// 미션 수정 저장 버튼 연결
+const saveBtn = document.getElementById("saveMissionEditsBtn");
+if(saveBtn) {
+    saveBtn.addEventListener("click", saveMissionEdits);
+}
 let currentCustomMissions = {};
 
 
@@ -4035,7 +4040,89 @@ function renderCalendar(date) {
 }
 
 
+/* ====================================
+   미션 수정 기능 (신규)
+   ==================================== */
 
+// 1. 커스텀 미션 불러오기 (초기화 시 실행)
+function loadCustomMissions() {
+    const stored = localStorage.getItem("rl_custom_missions_v2");
+    if (stored) {
+        try {
+            const custom = JSON.parse(stored);
+            // 기존 missionPools에 덮어쓰기
+            for (let key in custom) {
+                if (missionPools[key]) {
+                    missionPools[key].fixed = custom[key].fixed || missionPools[key].fixed;
+                    missionPools[key].random = custom[key].random || missionPools[key].random;
+                }
+            }
+            console.log("커스텀 미션 데이터 로드 완료");
+        } catch (e) { console.error("커스텀 미션 로드 실패", e); }
+    }
+}
+
+// 2. 미션 수정 테이블 그리기 (탭 클릭 시 실행)
+function renderMissionEditTable() {
+    const tbody = document.querySelector("#editMissionTable tbody");
+    tbody.innerHTML = "";
+
+    for (const key in missionPools) {
+        const category = missionPools[key];
+        
+        // 카테고리 헤더 행
+        const catRow = document.createElement("tr");
+        catRow.innerHTML = `<td colspan="3" style="background:#e3f2fd; font-weight:bold; text-align:center; padding:8px;">[ ${category.name} ]</td>`;
+        tbody.appendChild(catRow);
+
+        // 정규 미션 목록
+        category.fixed.forEach((mission, index) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td style="text-align:center;">정규</td>
+                <td>${mission}</td>
+                <td><input type="text" class="edit-mission-input" data-cat="${key}" data-type="fixed" data-idx="${index}" value="${mission}" style="width:95%; padding:5px;"></td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        // 랜덤 미션 목록
+        category.random.forEach((mission, index) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td style="text-align:center; color:#666;">랜덤</td>
+                <td>${mission}</td>
+                <td><input type="text" class="edit-mission-input" data-cat="${key}" data-type="random" data-idx="${index}" value="${mission}" style="width:95%; padding:5px;"></td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+}
+
+// 3. 미션 저장하기 (저장 버튼 클릭 시 실행)
+function saveMissionEdits() {
+    const inputs = document.querySelectorAll(".edit-mission-input");
+    
+    // 현재 missionPools를 복사해서 업데이트
+    inputs.forEach(input => {
+        const cat = input.dataset.cat;
+        const type = input.dataset.type;
+        const idx = input.dataset.idx;
+        const val = input.value.trim();
+        
+        if (val) {
+            missionPools[cat][type][idx] = val;
+        }
+    });
+
+    // 로컬 스토리지에 저장
+    localStorage.setItem("rl_custom_missions_v2", JSON.stringify(missionPools));
+    
+    alert("미션 내용이 수정되었습니다.\n변경된 미션은 '다음 날'부터 적용됩니다.");
+    
+    // (선택) UI 즉시 반영을 위해 테이블 다시 그리기
+    renderMissionEditTable();
+}
 
 
 
@@ -4043,6 +4130,7 @@ function renderCalendar(date) {
    초기화
    ------------------------ */
 function init(){
+	loadCustomMissions();
     loadFromLocal(false); 
     renderMissions(); // ★ 이 안에서 renderDailyCharts()가 호출됨
     renderPlayer(); 
