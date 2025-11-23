@@ -5,10 +5,16 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>생활 루틴 퀘스트 - RPG UI</title>
 <style>
-
+@font-face {
+    font-family: 'Paperozi';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-4Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-display: swap;
+}
 /* 기본 레이아웃 */
 body {
-    font-family: "Malgun Gothic", "맑은 고딕", "Nanum Gothic", Arial, sans-serif;
+font-family: 'Paperozi', "Malgun Gothic", sans-serif; /* 'Paperozi'를 맨 앞에 추가 */
+    
     background: linear-gradient(180deg, #f4f6fb, #ffffff);
     margin: 0;
     box-sizing: border-box;
@@ -454,27 +460,10 @@ body {
 }
 
 @keyframes shake-big {
-
-    10%,
-    90% {
-        transform: translate3d(-2px, -2px, 0);
-    }
-
-    20%,
-    80% {
-        transform: translate3d(4px, 4px, 0);
-    }
-
-    30%,
-    50%,
-    70% {
-        transform: translate3d(-8px, -8px, 0);
-    }
-
-    40%,
-    60% {
-        transform: translate3d(8px, 8px, 0);
-    }
+    10%, 90% { transform: translate3d(-4px, -4px, 0); }   /* 2px -> 4px */
+    20%, 80% { transform: translate3d(8px, 8px, 0); }     /* 4px -> 8px */
+    30%, 50%, 70% { transform: translate3d(-16px, -16px, 0); } /* 8px -> 16px */
+    40%, 60% { transform: translate3d(16px, 16px, 0); }    /* 8px -> 16px */
 }
 
 /* ▼▼▼ 2. 메인 UI (HP/MP 게이지) ▼▼▼ */
@@ -828,11 +817,11 @@ body {
     pointer-events: none;
 }
 
-/* ▼▼▼ 12. 장비창 슬롯 (신규) ▼▼▼ */
+/*  장비창 슬롯  */
 .equip-slot {
     position: absolute;
-    width: 100px;  /* 300px은 너무 커서 100px로 조정했습니다 */
-    height: 100px; /* 300px은 너무 커서 100px로 조정했습니다 */
+    width: 100px; 
+    height: 100px; 
     border: 3px solid #000; /* 스케치처럼 검은 테두리 */
     border-radius: 8px;
     background-color: rgba(255, 255, 255, 0.5); /* 반투명 흰색 배경 */
@@ -865,7 +854,7 @@ body {
     left: 0;
     width: 100%;
     height: 100px;
-    z-index: 20; /* 캐릭터 레이어(5)보다 높게 */
+    z-index: 1000; /* 캐릭터 레이어(5)보다 높게 */
     pointer-events: none; /* 클릭 방지 */
     text-align: center;
 }
@@ -1162,6 +1151,7 @@ body {
     font-weight: bold;
     text-align: center;
     width: 250px;
+
     box-sizing: border-box;
 }
 
@@ -1496,8 +1486,6 @@ body {
     color: white;
 }
 
-/* --- 3. 미션 목록 (기존 스타일 재활용) --- */
-/* .mission-grid { ... } (기존 스타일이 이미 있습니다) */
 
 /* --- 4. 하단 통계 --- */
 .stats-divider {
@@ -1784,6 +1772,9 @@ body {
     h2 {
         font-size: 20px;
     }
+
+
+
 }
 
 
@@ -1857,7 +1848,214 @@ body {
     50% { transform: scale(1.05); }
     100% { transform: scale(1); }
 }
-	
+/* ====================================
+   몬스터 도감 스타일 (신규)
+   ==================================== */
+#monster-book-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* 5열 */
+    gap: 8px; /* 칸 사이 간격 */
+    padding: 10px;
+    background: #f0f0f0;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.book-slot {
+    aspect-ratio: 1 / 1; /* 정사각형 유지 */
+    background-color: #fff;
+    border: 2px solid #ccc;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.book-slot img {
+    width: 90%;
+    height: 90%;
+    object-fit: contain;
+}
+
+.book-slot.empty {
+    background-color: #ddd; /* 비어있을 때 회색 */
+}
+
+.book-slot.empty::after {
+    content: '?';
+    font-size: 24px;
+    font-weight: bold;
+    color: #999;
+}	
+
+
+
+/* ====================================
+   인벤토리 스타일 (신규)
+   ==================================== */
+.inv-category-nav {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 15px;
+    background: #eee;
+    border-radius: 8px;
+    padding: 5px;
+}
+
+.inv-cat-btn {
+    border: none;
+    background: transparent;
+    padding: 8px 12px;
+    font-weight: bold;
+    color: #555;
+    cursor: pointer;
+    border-radius: 5px;
+    flex: 1;
+}
+
+.inv-cat-btn.active {
+    background: #3f51b5;
+    color: white;
+}
+
+#inventory-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7열 */
+    grid-template-rows: repeat(10, 1fr);   /* 10행 */
+    gap: 5px;
+    padding: 10px;
+    background: #e8e8e8;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    /* 7x10 비율 유지하면서 스크롤 없이 보이게 하거나 스크롤 생성 */
+    max-height: 500px; 
+    overflow-y: auto; 
+}
+
+.inv-slot {
+    aspect-ratio: 1 / 1; /* 정사각형 */
+    background-color: #fff;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.inv-slot img {
+    width: 90%;
+    height: 90%;
+    object-fit: contain;
+}
+
+.inv-count-badge {
+    position: absolute;
+    bottom: 0px;
+    right: 5px;
+    background: none; /* ✅ 검정 배경 제거 */
+    color: #000; /* ✅ 글자색 검정 (또는 원하시는 색) */
+    font-size: 20px; /* ✅ 글자 크기 확대 */
+    font-weight: bold;
+    padding: 0;
+    /* 아이템 이미지와 겹쳐도 잘 보이도록 흰색 테두리(그림자) 효과 추가 */
+    text-shadow: 
+        -1px -1px 0 #fff,  
+        1px -1px 0 #fff,
+        -1px 1px 0 #fff,
+        1px 1px 0 #fff;
+    pointer-events: none;
+}
+
+/* ====================================
+   UI 개선 (폰트, 데미지 색상)
+   ==================================== */
+
+/* 1. 선택창(탭 버튼) 폰트 적용 및 진하게 */
+.tab-nav .tab-btn,
+.inv-category-nav .inv-cat-btn {
+    /* body에 적용된 폰트를 강제로 상속받게 함 */
+    font-family: 'Paperozi', "Malgun Gothic", sans-serif; 
+    font-weight: 900; /* 아주 진하게 */
+    font-size: 18px;  /* 글자 크기 약간 확대 */
+    color: #555;      /* 기본 색상 */
+}
+
+/* 활성화된 탭은 더 진하고 색상 변경 */
+.tab-nav .tab-btn.active,
+.inv-category-nav .inv-cat-btn.active {
+    color: #3f51b5;
+    font-weight: 900;
+    border-bottom-width: 3px; /* 테두리도 두껍게 */
+}
+
+
+/* 2. 데미지 폰트 가시성 개선 */
+.damage-popup {
+    /* 기존의 검정 테두리(text-stroke) 제거 -> 이게 색을 가렸을 수 있음 */
+    -webkit-text-stroke: 0;
+    text-stroke: 0;
+
+    /* 글자 밖으로 검은 그림자를 주어 색상을 살림 */
+    text-shadow: 
+        -2px -2px 0 #000,  
+        2px -2px 0 #000,
+        -2px 2px 0 #000,
+        2px 2px 0 #000;
+    
+    font-weight: 900; /* 폰트 두께 최대 */
+    z-index: 9999; /* 확실하게 맨 위에 표시 */
+}
+
+/* 일반 데미지: 주황색 */
+.damage-popup.normal {
+    color: #ff9900 !important; /* 선명한 주황색 */
+    font-size: 32px; /* 크기 확대 */
+}
+
+/* 치명타 데미지: 빨간색 */
+.damage-popup.critical {
+    color: #ff0000 !important; /* 완전한 빨간색 */
+    font-size: 40px; /* 더 크게 강조 */
+}
+
+/* 회복: 초록색 */
+.damage-popup.heal {
+    color: #00ff00 !important;
+    font-size: 32px;
+}
+
+
+/* ====================================
+   폰트 및 텍스트 색상 버그 수정 (신규)
+   ==================================== */
+
+/* 1. 상점, 미션 필터, 인벤토리 탭 버튼 폰트 강제 적용 */
+.shop-tab-btn, 
+.filter-btn, 
+.inv-cat-btn {
+    font-family: 'Paperozi', "Malgun Gothic", sans-serif !important; /* 폰트 강제 */
+    font-weight: 900;
+}
+
+/* 2. 인벤토리 활성 탭 텍스트 색상 수정 */
+/* (파란 배경 위에서 글자가 잘 보이도록 흰색으로 변경) */
+.inv-cat-btn.active {
+    color: #ffffff !important; 
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3); /* 가독성을 위한 그림자 */
+}
+
+/* 3. 미션 필터 버튼 활성 상태 텍스트 색상 */
+.filter-btn.active {
+    color: #ffffff !important;
+}
+
+/* 4. 상점 탭 버튼 활성 상태 텍스트 색상 (기존 유지하되 폰트만 적용) */
+.shop-tab-btn.active {
+    /* color: #3f51b5; (기존 색상 유지) */
+}
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> </head>
@@ -1897,15 +2095,39 @@ body {
         <h2>나의 정보</h2>
         <div class="tab-nav">
             <button class="tab-btn active" data-target="info-tab-stats">내 정보</button>
+            <button class="tab-btn" data-target="info-tab-inventory">인벤토리</button>
             <button class="tab-btn" data-target="info-tab-skills">스킬</button>
             <button class="tab-btn" data-target="info-tab-titles">칭호</button>
+            <button class="tab-btn" data-target="info-tab-book">도감</button>
+            
+        </div>
+<div id="info-tab-inventory" class="tab-content">
+            <div class="inv-category-nav">
+                <button class="inv-cat-btn active" onclick="renderInventory('weapon')">무기</button>
+                <button class="inv-cat-btn" onclick="renderInventory('top')">상의</button>
+                <button class="inv-cat-btn" onclick="renderInventory('bottom')">하의</button>
+                <button class="inv-cat-btn" onclick="renderInventory('shield')">방패</button>
+                <button class="inv-cat-btn" onclick="renderInventory('consumable')">소비</button>
+            </div>
+            
+            <div id="inventory-grid">
+                </div>
+        </div>
+<div id="info-tab-titles" class="tab-content">
+<div id="titleList" style="display: flex; flex-direction: column; gap: 12px; max-height: 450px; overflow-y: auto; padding: 5px;"></div>
+             </div>
+
+        <div id="info-tab-book" class="tab-content">
+            <h3>몬스터 도감 (수집: <span id="book-collection-count">0</span>/30)</h3>
+            <div id="monster-book-grid">
+                </div>
         </div>
         
         <div id="info-tab-stats" class="tab-content active">
 <div id="info-tab-stats-container">
 
         <div id="info-coin-box" class="info-box-stat info-box-coin">
-            🪙 <span id="info-coin-text">0</span>
+            🪙 코인	 <span id="info-coin-text">0</span>
         </div>
 
         <div id="info-middle-section">
@@ -1944,10 +2166,27 @@ body {
             <div class="info-skill-slot" id="info-skill-5" title="(비어있음)"></div>
         </div>
 
-<div id="info-level-box" style="display: flex; flex-direction: column; align-items: center;">
-            <div id="equippedTitleDisplay" style="font-size: 16px; font-weight: bold; color: #3f51b5; margin-bottom: 5px; height: 20px;"></div>
-            <span id="levelTag">Lv.1 초보자</span>
-            <span id="spDisplay" style="font-size: 14px; color: #ff5722; margin-left: 10px; font-weight: bold;">(SP: 0)</span>
+<div id="info-level-container" style="width: 250px; display: flex; flex-direction: column; align-items: center; gap: 5px;">
+            
+            <div id="equippedTitleDisplay" style="font-size: 16px; font-weight: bold; color: #3f51b5; height: 20px;"></div>
+            
+<div style="width: 260px; display: flex; flex-direction: column; align-items: center; gap: 5px;">
+            
+            <div id="equippedTitleDisplay" style="font-size: 16px; font-weight: bold; color: #3f51b5; height: 20px; text-align: center;"></div>
+            
+            <div style="display: flex; width: 100%; gap: 8px;">
+                
+                <div style="flex: 1; border: 2px solid #333; border-radius: 6px; background: #fff; padding: 8px; text-align: center; display: flex; align-items: center; justify-content: center;">
+                    <span id="levelTag" style="font-size: 18px; font-weight: bold;">Lv.1 초보자</span>
+                </div>
+
+                <div style="width: 80px; border: 2px solid #ff5722; border-radius: 6px; background: #fff; padding: 8px; text-align: center; display: flex; align-items: center; justify-content: center;">
+                    <span id="spDisplay" style="font-size: 14px; font-weight: bold; color: #ff5722;">SP: 0</span>
+                </div>
+
+            </div>
+
+        </div>
         </div>
 
         <div id="info-xp-section">
@@ -2216,8 +2455,7 @@ body {
 
 
 <div id="admin-controls-container">
-    <button id="totalResetBtn" class="admin-hidden-btn" title="전체 초기화 (주의!)">💥</button>
-<button id="resetBtn" class="admin-hidden-btn" title="일일 미션 초기화 (관리자용)">🔄</button>
+
 </div>
 
 <div class="modal-bg" id="equipmentModal">
@@ -2374,14 +2612,29 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             // 타겟 탭 콘텐츠만 보여주기
-            document.getElementById(targetId).classList.add('active');
-			if (targetId === 'info-tab-skills') {
-                renderSkillList(); // 스킬 탭을 누를 때마다 목록을 새로 그림
-            } else if (targetId === 'info-tab-titles') {
-                renderTitleList(); // 칭호 탭을 누를 때마다 목록을 새로 그림
-			} else if (targetId === 'settings-tab-edit') { // ✅ 추가된 부분
-                renderMissionEditTable(); // 미션 수정 탭 클릭 시 테이블 갱신
-            }
+document.getElementById(targetId).classList.add('active');
+            
+            if (targetId === 'info-tab-skills') {
+                renderSkillList(); 
+            } 
+            // ▼▼▼ 이 부분을 추가하세요! ▼▼▼
+            else if (targetId === 'info-tab-titles') {
+                renderTitleList(); // ✅ 칭호 목록 렌더링 함수 호출
+            } 
+            // ▲▲▲ 여기까지 추가 ▲▲▲
+            else if (targetId === 'settings-tab-edit') { 
+                renderMissionEditTable(); 
+            } else if (targetId === 'info-tab-book') {
+                renderMonsterBook();
+            }
+           // ▼▼▼ 이 부분을 추가하세요 ▼▼▼
+            else if (targetId === 'info-tab-inventory') {
+                renderInventory('weapon'); // 기본으로 무기 탭 보여줌
+            }
+            // ▲▲▲ 여기까지 추가 ▲▲▲
+
+
+
         });
     });
 
@@ -2422,8 +2675,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // hp 20 으로 설정
 let player = {
   level:1, xp:0,
-  baseAtk:5, hp:10000, maxHp:20, mp:20, maxMp:20, def:2, crit:5,
-  coins:500000, weapon:1, ownedWeapons: [1], potions:0, mpPotions:0,
+  baseAtk:5, hp:10000, maxHp:20, mp:20, maxMp:5, def:2, crit:5,
+  coins:0, weapon:1, ownedWeapons: [1], potions:0, mpPotions:0,
 // ★ 신규 장비 슬롯 및 소유 목록 추가
   equippedTop: null,    // 장착한 상의 ID (null = 없음)
   equippedBottom: null, // 장착한 하의 ID
@@ -2448,7 +2701,8 @@ let player = {
   dailyHistory: {},
   skillCooldowns: { skill4: 0, skill5: 0 },
   statPoints: 0,
-  weeklyCounts: { exercise: 0, study: 0, diet: 0, rest: 0 }
+  weeklyCounts: { exercise: 0, study: 0, diet: 0, rest: 0 },
+  monsterBook: []
 };
 let dungeonRunStats = null; // 던전 결과 추적용 (던전 입장 시 초기화)
 let playerDiedInDungeon = false; // 플레이어 사망 여부 플래그
@@ -2922,7 +3176,7 @@ function renderPlayer(){
     });
 	
 // ▼▼▼ 스탯 포인트 UI 갱신 (신규) ▼▼▼
-    document.getElementById("spDisplay").textContent = `(SP: ${player.statPoints})`;
+    document.getElementById("spDisplay").textContent = `SP: ${player.statPoints}`;
     
     const statButtons = document.querySelectorAll('.stat-up-btn');
     statButtons.forEach(btn => {
@@ -3028,7 +3282,13 @@ function completeMission(idx){
     
     const missionCategory = missions[idx].category;
     player.missionCountsByCategory[missionCategory]++; // 카테고리 비율용 카운트
-    player.weeklyCounts[missionCategory]++; // ✅ [신규] 주간 누적 (주간미션용)
+ // ▼▼▼ [추가] 주간 미션 카운트 즉시 증가 ▼▼▼
+    if (player.weeklyCounts === undefined) { 
+        player.weeklyCounts = { exercise: 0, study: 0, diet: 0, rest: 0 }; 
+    }
+    player.weeklyCounts[missionCategory]++;
+    renderWeeklyMissions(); // UI 즉시 새로고침
+    // ▲▲▲ 여기까지 추가 ▲▲▲
     const weeklyMission = player.weeklyMissions.find(wm => wm.category === missionCategory);
     if (weeklyMission) {
         // ... (기존 주간 미션 로직은 그대로 둡니다) ...
@@ -3245,6 +3505,7 @@ function equipItem(type, id) {
     player[equippedKey] = id; // 장착
 
     log(`'${item.name}'(을)를 장착했습니다.`); // ★ 이제 'item'을 알 수 있음
+     showRewardPopup([` ${item.name} 장착 완료!`]);
     renderPlayer(); // ★ 플레이어 상태 갱신 (스탯, 이미지)
     saveToLocal();
     showShopTab(currentShopTab); // ★ 상점 목록 갱신 (버튼 상태 변경)
@@ -3467,9 +3728,7 @@ function resetMissionsForAdmin(){
   missions.forEach(m => m.done = false); // 일일 미션 완료 상태 초기화
   player.dailyRewardClaimed = false; // 일일 보상 상태 초기화
   // player.weeklyMissionProgress = {}; // 주간 미션 진행도는 유지해야 함 (초기화 아님)
-
-  player.coins += 500000; // ✅ 50만 코인 지급
-  log("관리자 권한으로 미션을 초기화하고 50만 코인을 지급했습니다."); // ✅ 로그 수정
+player.coins += 500000;
   renderPlayer(); // ✅ '내 정보' 탭의 코인 UI를 새로고침
   renderMissions();
   renderWeeklyMissions(); // 주간 미션 UI 업데이트
@@ -3526,6 +3785,7 @@ function loadFromLocal(showLog){
      monsterDebuffs = { stunned: 0, poison: 0 };
     if(player.skillCooldowns === undefined) player.skillCooldowns = { skill4: 0, skill5: 0 };
     if(player.weeklyCounts === undefined) player.weeklyCounts = { exercise: 0, study: 0, diet: 0, rest: 0 };
+    if(player.monsterBook === undefined) player.monsterBook = [];
     if(player.statPoints === undefined) player.statPoints = 0;
 	renderPlayer(); renderMissions(); renderWeeklyMissions(); 
     if(showLog) log("불러오기 완료.");
@@ -4085,6 +4345,17 @@ function winBattle() {
   playSound('monsterwin.mp3');
   setPlayerButtons(false);
 
+// ▼▼▼ [도감 등록 로직 추가] ▼▼▼
+  // 현재 몬스터 이미지가 도감에 없고, 도감이 꽉 차지 않았다면 추가
+  if (!player.monsterBook.includes(monster.img)) {
+      if (player.monsterBook.length < 30) {
+          player.monsterBook.push(monster.img);
+          battleMsg(`📖 도감에 새 몬스터가 등록되었습니다!`);
+          saveToLocal(); // 저장
+      }
+  }
+  // ▲▲▲ 여기까지 추가 ▲▲▲
+
   const rewardCoins = 100 * monster.level;
   const rewardXp = 50 * monster.level;
 
@@ -4189,8 +4460,13 @@ function applyDungeonRewards() {
   // 사망 시 HP/MP 복구
   if (playerDiedInDungeon) {
     log("전투 패배로 HP/MP가 절반 회복됩니다.");
-    const totalMaxHp = player.maxHp + getTitleStatBonus('hp');
-    const totalMaxMp = player.maxMp + getTitleStatBonus('mp');
+// ▼▼▼ [수정] 장비 스탯까지 포함한 '진짜 최대 체력/마나' 계산 ▼▼▼
+    const t = shopTops.find(x=>x.id===player.equippedTop);
+    const b = shopBottoms.find(x=>x.id===player.equippedBottom);
+    
+    const totalMaxHp = player.maxHp + (t? t.hp : 0) + getTitleStatBonus('hp');
+    const totalMaxMp = player.maxMp + (b? b.mp : 0) + getTitleStatBonus('mp');
+    // ▲▲▲ 여기까지 수정 ▲▲▲
     player.hp = Math.max(1, Math.floor(totalMaxHp * 0.5));
     player.mp = Math.max(1, Math.floor(totalMaxMp * 0.5));
     playerDiedInDungeon = false; // 플래그 리셋
@@ -4400,6 +4676,120 @@ function saveMissionEdits() {
     
     // (선택) UI 즉시 반영을 위해 테이블 다시 그리기
     renderMissionEditTable();
+}
+
+// ▼▼▼ 도감 렌더링 함수 (신규) ▼▼▼
+function renderMonsterBook() {
+    const grid = document.getElementById('monster-book-grid');
+    const countSpan = document.getElementById('book-collection-count');
+    grid.innerHTML = "";
+    
+    countSpan.textContent = player.monsterBook.length;
+
+    // 5x6 = 30칸 생성
+    for (let i = 0; i < 30; i++) {
+        const slot = document.createElement('div');
+        slot.className = 'book-slot';
+
+        if (i < player.monsterBook.length) {
+            // 수집된 몬스터 표시
+            const img = document.createElement('img');
+            img.src = player.monsterBook[i];
+            slot.appendChild(img);
+            // (선택사항) 클릭 시 정보 보기 등을 추가할 수 있음
+            slot.title = "수집됨";
+        } else {
+            // 빈 칸 표시
+            slot.className += ' empty';
+        }
+        grid.appendChild(slot);
+    }
+}
+
+// ▼▼▼ 인벤토리 렌더링 함수 (수정됨: 장비 클릭 시 장착) ▼▼▼
+function renderInventory(category) {
+    // 1. 탭 버튼 스타일 갱신
+    const buttons = document.querySelectorAll('.inv-cat-btn');
+    buttons.forEach(btn => {
+        if (btn.textContent === getCategoryName(category)) btn.classList.add('active');
+        else btn.classList.remove('active');
+    });
+
+    const grid = document.getElementById('inventory-grid');
+    grid.innerHTML = "";
+
+    let itemsToShow = [];
+
+    // 2. 카테고리별 아이템 데이터 수집
+    if (category === 'consumable') {
+        // 소비 아이템
+        if ((player.potions || 0) > 0) {
+            itemsToShow.push({ img: 'images/bottle.png', count: player.potions, name: 'HP 물약' });
+        }
+        if ((player.mpPotions || 0) > 0) {
+            itemsToShow.push({ img: 'images/bottle2.png', count: player.mpPotions, name: 'MP 물약' });
+        }
+    } else {
+        // 장비 아이템
+        let ownedIds = [];
+        let sourceData = [];
+
+        if (category === 'weapon') { ownedIds = player.ownedWeapons; sourceData = shopWeapons; }
+        else if (category === 'top') { ownedIds = player.ownedTops; sourceData = shopTops; }
+        else if (category === 'bottom') { ownedIds = player.ownedBottoms; sourceData = shopBottoms; }
+        else if (category === 'shield') { ownedIds = player.ownedShields; sourceData = shopShields; }
+
+        // 보유한 ID에 해당하는 아이템 정보 찾기
+        // ★★★ [수정] item.id도 함께 저장하도록 변경 ★★★
+        itemsToShow = ownedIds.map(id => {
+            const item = sourceData.find(data => data.id === id);
+            return item ? { id: item.id, img: item.shopImg || item.img, name: item.name } : null;
+        }).filter(item => item !== null); 
+    }
+
+    // 3. 7x10 = 70칸 생성 및 채우기
+    for (let i = 0; i < 70; i++) {
+        const slot = document.createElement('div');
+        slot.className = 'inv-slot';
+
+        // 아이템이 있으면 이미지 표시
+        if (i < itemsToShow.length) {
+            const item = itemsToShow[i];
+            const img = document.createElement('img');
+            img.src = item.img;
+            img.alt = item.name;
+            img.title = item.name; 
+            slot.appendChild(img);
+
+            // 개수가 있다면(소비 아이템) 배지 표시
+            if (item.count !== undefined) {
+                const badge = document.createElement('span');
+                badge.className = 'inv-count-badge';
+                badge.textContent = item.count;
+                slot.appendChild(badge);
+            } 
+            // ★★★ [추가] 소비 아이템이 아니면(장비면) 클릭 시 장착 ★★★
+            else {
+                slot.style.cursor = "pointer"; // 클릭 커서로 변경
+                slot.onclick = () => {
+                    equipItem(category, item.id); // 기존 장착 함수 호출
+                    // (equipItem 함수 내부에 renderPlayer, saveToLocal이 포함되어 있어 즉시 반영됩니다)
+                };
+            }
+        }
+
+        grid.appendChild(slot);
+    }
+}
+
+// (헬퍼 함수: 영문 카테고리를 한글로)
+function getCategoryName(cat) {
+    if (cat === 'weapon') return '무기';
+    if (cat === 'top') return '상의';
+    if (cat === 'bottom') return '하의';
+    if (cat === 'shield') return '방패';
+    if (cat === 'consumable') return '소비';
+    return '';
 }
 
 
