@@ -1769,7 +1769,106 @@ font-family: 'Paperozi', "Malgun Gothic", sans-serif;
         font-size: 20px;
     }
 
+/* ▼▼▼ [추가] 모바일 던전 UI 최적화 ▼▼▼ */
 
+    /* 1. 상단 정보 바 크기 축소 */
+    #dungeon-top-bar {
+        gap: 5px; /* 간격 줄임 */
+    }
+    .dungeon-info-box {
+        padding: 5px;
+        flex-direction: column; /* 모바일에서는 세로로 정렬 (사진 위, 스탯 아래) */
+        align-items: center;
+        text-align: center;
+        height: auto;
+    }
+    .profile-pic {
+        width: 40px;
+        height: 40px;
+        margin-bottom: 5px;
+    }
+    .stats-details {
+        width: 100%;
+    }
+    .level-name {
+        font-size: 12px; /* 글자 크기 축소 */
+        margin-bottom: 2px;
+    }
+    /* HP/MP 바 얇게 */
+    .hp-bar, .mp-bar {
+        height: auto; 
+        margin: 2px auto; /* 중앙 정렬 */
+    }
+    .hp-fill, .mp-fill {
+        height: 10px; /* 게이지 두께 줄임 */
+    }
+    .hp-bar-text, .mp-bar-text {
+        font-size: 10px; /* 수치 글자 줄임 */
+    }
+
+    /* VS 마크 축소 */
+    #vs-sign {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+        border-width: 2px;
+    }
+
+    /* 2. 전투 캐릭터 크기 대폭 축소 (가장 중요) */
+    .battle-box {
+        margin-top: 10px;
+        gap: 10px; /* 캐릭터 사이 간격 */
+    }
+    .battle-char,
+    .battle-mon {
+        /* PC: 260px -> 모바일: 130px로 축소 */
+        width: 130px;
+        height: 130px;
+    }
+
+    /* 데미지 폰트도 모바일에선 조금 작게 */
+    .damage-popup.normal { font-size: 24px !important; }
+    .damage-popup.critical { font-size: 30px !important; }
+
+    /* 3. 액션 버튼(공격/물약) 크기 축소 */
+    .action-row {
+        gap: 10px;
+        margin-top: 15px;
+    }
+    .action-btn {
+        width: 80px;  /* 120px -> 80px */
+        height: 80px;
+        font-size: 14px;
+        background-size: 60%; /* 아이콘 크기 조절 */
+    }
+
+    /* 4. 스킬 버튼 크기 축소 */
+    .common-skill-row {
+        gap: 8px;
+        margin-top: 10px;
+        height: 60px;
+    }
+    .skill-btn {
+        width: 45px; /* 70px -> 45px */
+        height: 45px;
+        border-width: 2px;
+    }
+
+    /* 5. 뒤로가기 버튼 위치 조정 */
+    .escape-btn-corner {
+        top: 10px;
+        right: 10px;
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+        line-height: 32px;
+    }
+    
+    /* 6. 배틀 로그 높이 줄임 */
+    .battle-log {
+        height: 100px;
+        font-size: 12px;
+    }
 
 }
 
