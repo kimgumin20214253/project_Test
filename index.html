@@ -1,0 +1,4827 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>생활 루틴 퀘스트 - RPG UI</title>
+<style>
+@font-face {
+    font-family: 'Paperozi';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-4Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-display: swap;
+}
+/* 기본 레이아웃 */
+body {
+font-family: 'Paperozi', "Malgun Gothic", sans-serif; 
+    
+    background: linear-gradient(180deg, #f4f6fb, #ffffff);
+    margin: 0;
+    box-sizing: border-box;
+}
+
+
+
+
+
+.icon-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 20px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.icon-btn:hover {
+    background-color: #303f9f;
+}
+
+.icon-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* 관리자용 투명 버튼은 기존 스타일 유지 (덮어쓰기 X) */
+#totalResetBtn[style*="opacity:0"],
+#resetBtn[style*="opacity:0"] {
+    background: #fff;
+    /* 기본 흰색 배경 유지 (다른 icon-btn과 구분) */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    /* 원래 모양 유지 */
+}
+
+
+
+
+
+
+.left h2 {
+    text-align: center;
+    margin: 0 0 12px 0;
+    font-size: 28px;
+}
+
+.mission-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.mission {
+    height: 56px;
+    border-radius: 8px;
+    border: 2px solid #222;
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.mission.done {
+    background: #e6ffe6;
+    border-color: #4caf50;
+}
+
+.mission .status {
+    width: 28px;
+    text-align: center;
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+
+
+.character-box {
+    width: 260px;
+    height: 260px;
+    border: 6px solid #fff;
+    border-radius: 8px;
+    background: #f3f3f3; 
+    /* position: relative; */ /* ★ 삭제 */
+    overflow: hidden;
+    display: grid; /* ★ CSS Grid로 변경 */
+}
+
+.character-box > img {
+    /* position: absolute; */ /* ★ 삭제 */
+    left: 0px; 
+    top: 5px; 
+    grid-column: 1 / 1; /* ★ 모든 이미지를 1번째 칸에 겹치기 */
+    grid-row: 1 / 1; /* ★ 모든 이미지를 1번째 칸에 겹치기 */
+    width: 100%;
+    height: 100%;
+    /* object-fit: contain; */ /* ★ 꽉 채우기 위해 삭제 */
+    pointer-events: none;
+    image-rendering: pixelated; 
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+
+.stats {
+    width: 100%;
+    margin-top: 12px;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 6px 0;
+    font-size: 16px;
+}
+
+.coin-box {
+    width: 100%;
+    text-align: center;
+    margin-top: 12px;R
+    font-size: 20px;
+    padding: 8px;
+    border-radius: 8px;
+    background: #fffbe6;
+    border: 1px solid #f0c36d;
+}
+
+.btn {
+    padding:8px 15px 8px 15px;
+    min-width: 100px;
+    height: auto;
+    box-sizing: border-box;
+    border-radius: 50px;
+    font-size: 18px;
+    font-weight: 700;
+    background-color:#5877f9;
+    border:2px solid #5877f9;
+    color:#ffffff;
+}
+
+.btn:hover {
+    background-color: #303f9f;
+    /* 호버 시 약간 어둡게 */
+}
+
+.btn:active {
+    transform: translateY(1px);
+    /* 클릭 시 약간 눌리는 효과 */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.btn:disabled {
+    /* 비활성화 버튼 스타일 */
+    background: #ccc;
+    color: #777;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+.dungeon-panel {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.dungeon-panel button {
+    font-size: 26px;
+    padding: 40px 60px;
+    background: #ffebd5;
+    border: 3px solid #ff9800;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+/* 던전 화면 */
+
+
+.battle-box {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin-top: 30px;
+}
+
+.battle-char,
+.battle-mon {
+    width: 260px;
+    height: 260px;
+    border: none;
+    border-radius: 8px;
+    background: transparent center/contain no-repeat;
+    /* 배경색을 transparent(투명)로 변경 */
+    position: relative;
+}
+
+
+/* ▼▼▼ 11. 던전 캐릭터 레이어 (신규) ▼▼▼ */
+.battle-char > img {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+.hp-bar {
+    width: 220px;
+    height: 20px;
+    border: 1px solid #444;
+    margin: 8px auto;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #eee;
+}
+
+.hp-fill {
+    height: 100%;
+    background: #ff5252;
+    width: 100%;
+    transition: width 0.3s;
+}
+
+.action-row {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 24px;
+}
+
+.action-btn {
+    width: 120px;
+    height: 120px;
+    border-radius: 8px;
+    border: 2px solid #333;
+    background: #fff center/contain no-repeat;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 6px;
+    font-weight: 700;
+}
+
+.battle-log {
+    margin-top: 20px;
+    width: 80%;
+    height: 160px;
+    background: #fff;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    overflow: auto;
+    padding: 10px;
+    text-align: left;
+}
+
+/* 상점 모달 */
+.modal-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+.modal {
+    width: 860px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 18px;
+}
+
+.shop-item {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    background: #f4f6ff;
+    border: 1px solid #ccd7ff;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.shop-item img {
+    width: 500px;
+    height: 100px;
+    object-fit: contain;
+}
+
+#shopList {
+    max-height: 360px;
+    /* 최대 높이를 지정합니다 (아이템 3개 정도의 높이) */
+    overflow-y: auto;
+    /* 내용이 높이를 초과하면 세로 스크롤을 자동으로 생성합니다 */
+    padding-right: 8px;
+    /* (선택) 스크롤바가 내용과 겹치지 않도록 여백을 줍니다 */
+}
+
+/* ▼▼▼ 던전 결과 모달 (신규) ▼▼▼ */
+.modal-result {
+    width: 450px;
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    border: 3px solid #6a78ff;
+    text-align: center;
+    /* ★ 텍스트 가운데 정렬 추가 */
+}
+
+.result-line {
+    margin-bottom: 10px;
+    font-size: 16px;
+    text-align: left;
+    /* ★ 내용은 왼쪽 정렬 유지 */
+    display: inline-block;
+    /* ★ 가운데 정렬 위해 인라인 블록으로 */
+    width: 80%;
+    /* ★ 적절한 너비 설정 */
+}
+
+.result-line strong {
+    display: inline-block;
+    min-width: 90px;
+    /* 레이블 너비 약간 줄임 */
+    font-weight: bold;
+    margin-right: 10px;
+    /* ★ 레이블과 값 사이 간격 */
+}
+
+.result-buttons {
+    text-align: center;
+    margin-top: 20px;
+}
+
+
+
+
+#dungeonScreen {
+    padding: 30px;
+    text-align: center;
+    background-size: cover;
+    /* 배경 이미지 크기 설정 */
+    background-position: center;
+    /* 배경 이미지 위치 설정 */
+    transition: background-image 0.5s ease-in-out;
+    /* 부드러운 전환 효과 */
+}
+
+/* ★ 추가: 던전 배경화면 오버레이 (색상 연하게) ★ */
+#dungeonScreen::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.4);
+    /* 흰색 40% 투명도 (조절 가능) */
+    z-index: -1;
+    /* 배경 이미지 위에, 내용물 아래에 */
+}
+
+/* ... 이하 동일 ... */
+/* 설정 모달 */
+.settings-modal {
+    width: 420px;
+    padding: 12px;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.exp-bar {
+    width: 200px;
+    height: 12px;
+    border: 1px solid #999;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #eee;
+    margin-top: 6px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.exp-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #00bfff, #0077ff);
+    transition: width 0.4s;
+}
+
+
+/* ▼▼▼ 1. 전투 애니메이션 ▼▼▼ */
+.shake-normal {
+    animation: shake 0.5s;
+}
+
+.shake-crit {
+    animation: shake-big 0.5s cubic-bezier(.36, .07, .19, .97);
+}
+
+@keyframes shake {
+
+    10%,
+    90% {
+        transform: translate3d(-1px, 0, 0);
+    }
+
+    20%,
+    80% {
+        transform: translate3d(2px, 0, 0);
+    }
+
+    30%,
+    50%,
+    70% {
+        transform: translate3d(-4px, 0, 0);
+    }
+
+    40%,
+    60% {
+        transform: translate3d(4px, 0, 0);
+    }
+}
+
+@keyframes shake-big {
+    10%, 90% { transform: translate3d(-4px, -4px, 0); }   /* 2px -> 4px */
+    20%, 80% { transform: translate3d(8px, 8px, 0); }     /* 4px -> 8px */
+    30%, 50%, 70% { transform: translate3d(-16px, -16px, 0); } /* 8px -> 16px */
+    40%, 60% { transform: translate3d(16px, 16px, 0); }    /* 8px -> 16px */
+}
+
+/* ▼▼▼ 2. 메인 UI (HP/MP 게이지) ▼▼▼ */
+.stat-bar-box {
+    margin-bottom: 8px;
+}
+
+.stat-bar-label {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.stat-bar-container {
+    width: 100%;
+    height: 16px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid #555;
+}
+
+.hp-bg {
+    background: #ffebee;
+}
+
+.mp-bg {
+    background: #e3f2fd;
+}
+
+.stat-bar-fill {
+    height: 100%;
+    transition: width 0.3s;
+}
+
+.hp-fill-main {
+    background: #ff5252;
+}
+
+.mp-fill-main {
+    background: #448aff;
+}
+
+.stat-bar-text {
+    font-size: 13px;
+    text-align: center;
+    margin-top: 2px;
+    font-weight: 600;
+}
+
+.mp-fill {
+    background: #448aff;
+}
+
+/* ▼▼▼ 3. 스킬 창 (신규) ▼▼▼ */
+.skill-item {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    background: #f7f7f7;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.skill-item-img {
+    width: 100px;
+    height: 100px;
+    border: 2px solid #555;
+    border-radius: 8px;
+    background: #fff center/contain no-repeat;
+    flex-shrink: 0;
+}
+
+.skill-item-level {
+    font-size: 24px;
+    font-weight: 900;
+    text-align: center;
+    margin-top: 4px;
+}
+
+.skill-item-desc {
+    flex: 1;
+}
+
+.skill-item-desc h4 {
+    margin: 0 0 8px 0;
+    font-size: 20px;
+}
+
+.skill-item-desc p {
+    margin: 0;
+    font-size: 15px;
+}
+
+.skill-item-action {
+    width: 140px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+/* ▼▼▼ 4. 던전 공통 스킬 버튼 (신규) ▼▼▼ */
+.common-skill-row {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+    height: 80px;
+    /* 높이 고정 */
+}
+
+.skill-btn {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    /* 원형 버튼 */
+    border: 3px solid #555;
+    background: #f0f0f0 center/contain no-repeat;
+    cursor: pointer;
+    font-weight: 700;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s;
+}
+
+.skill-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.skill-btn:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.skill-btn.on-cooldown {
+    background-color: #ffcdd2;
+    opacity: 0.7;
+}
+
+/* ▼▼▼ 5. 던전 이펙트 오버레이 (신규) ▼▼▼ */
+.battle-effect-overlay {
+    position: absolute;
+    inset: 0;
+    display: none;
+    background: center/contain no-repeat;
+    pointer-events: none;
+    /* 클릭 방지 */
+    z-index: 1;
+}
+
+/* ▼▼▼ 6. 주간 미션 (신규) ▼▼▼ */
+.weekly-mission-section {
+    margin-top: 20px;
+    border-top: 2px dashed #6a78ff;
+    padding-top: 15px;
+}
+
+.weekly-mission-section h3 {
+    text-align: center;
+    margin: 0 0 10px 0;
+    font-size: 20px;
+}
+
+.weekly-mission {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    font-size: 15px;
+}
+
+.weekly-mission .progress-bar-container {
+    flex: 1;
+    height: 10px;
+    background: #eee;
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 0 10px;
+}
+
+.weekly-mission .progress-bar-fill {
+    height: 100%;
+    background: #6a78ff;
+    width: 0%;
+    /* JS에서 조절 */
+    transition: width 0.3s;
+}
+
+.weekly-mission .progress-text {
+    font-weight: bold;
+    min-width: 50px;
+    /* 너비 고정 */
+    text-align: right;
+}
+
+/* ▼▼▼ 7. 칭호 창 (신규) ▼▼▼ */
+.title-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.title-item-info {
+    flex: 1;
+}
+
+.title-item-info .mission-name {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.title-item-info .progress-text {
+    font-size: 13px;
+    color: #555;
+    margin-top: 4px;
+}
+
+.title-item-info .progress-bar-container {
+    /* 주간미션 스타일 재활용 */
+    height: 8px;
+    margin-top: 6px;
+}
+
+.title-item-reward {
+    text-align: right;
+    min-width: 180px;
+}
+
+.title-item-reward .title-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: #3f51b5;
+}
+
+.title-item-reward .title-stats {
+    font-size: 13px;
+    color: #666;
+    margin-top: 4px;
+}
+
+.title-item-action button {
+    min-width: 90px;
+    /* 버튼 너비 고정 */
+}
+
+/* ▼▼▼ 8. 미션 수정 창 (신규) ▼▼▼ */
+.edit-mission-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.edit-mission-table th,
+.edit-mission-table td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+}
+
+.edit-mission-table th {
+    background: #eee;
+    font-size: 14px;
+}
+
+.edit-mission-table td input[type="text"] {
+    width: calc(100% - 10px);
+    /* 패딩 고려 */
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.edit-mission-table .category-row th {
+    background: #e3f2fd;
+    font-weight: bold;
+    text-align: center;
+}
+
+.edit-mission-table .random-row {
+    background: #e3f2fd;
+    /* 연한 파란색 배경 */
+}
+
+
+/* ▼▼▼ 9. 상점 탭 (신규) ▼▼▼ */
+.shop-tabs {
+    display: flex;
+    gap: 5px;
+    border-bottom: 2px solid #ccc;
+    margin-bottom: 15px;
+    padding-left: 5px;
+}
+.shop-tab-btn {
+    padding: 10px 15px;
+    cursor: pointer;
+    border: none;
+    background: #f0f0f0;
+    border-radius: 6px 6px 0 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #555;
+    border-bottom: 2px solid transparent;
+}
+.shop-tab-btn:hover {
+    background: #e0e0e0;
+}
+.shop-tab-btn.active {
+    background: #fff;
+    color: #3f51b5;
+    /* 활성화 탭 테두리 */
+    border-top: 2px solid #3f51b5;
+    border-left: 2px solid #3f51b5;
+    border-right: 2px solid #3f51b5;
+    margin-bottom: -2px; /* 하단 테두리 덮어쓰기 */
+}
+
+
+/* ▼▼▼ 10. 장비창 (신규) ▼▼▼ */
+.equipment-modal {
+    /* ★★★ equiptable.png 파일의 실제 크기에 맞게 조절하세요 ★★★ */
+    width: 500px; 
+    height: 700px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: relative;
+}
+.equip-preview-box {
+    width: 260px; /* 캐릭터 박스 크기 */
+    height: 260px; /* 캐릭터 박스 크기 */
+    position: absolute;
+    /* ★★★ equiptable.png 내부의 캐릭터 칸 위치에 맞게 조절하세요 ★★★ */
+    top: 150px; 
+    left: 120px; 
+    /* border: 1px dashed red; */ /* (위치 잡기용 임시 테두리) */
+}
+.equip-preview-box > img {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+/*  장비창 슬롯  */
+.equip-slot {
+    position: absolute;
+    width: 100px; 
+    height: 100px; 
+    border: 3px solid #000; /* 스케치처럼 검은 테두리 */
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.5); /* 반투명 흰색 배경 */
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+/* equiptable.png 배경 이미지에 맞게 top/left 값을 직접 조절하세요! */
+#equipSlot_Top {
+    top: 200px;
+    left: 10px;
+}
+#equipSlot_Bottom {
+    top: 320px;
+    left: 10px;
+}
+#equipSlot_Weapon {
+    top: 200px;
+    left: 390px;
+}
+#equipSlot_Shield {
+    top: 320px;
+    left: 390px;
+}
+
+/* ▼▼▼ 13. 데미지 팝업 (신규) ▼▼▼ */
+.damage-popup-container {
+    position: absolute;
+    top: 5px; /* 캐릭터 머리 위 */
+    left: 0;
+    width: 100%;
+    height: 100px;
+    z-index: 1000; /* 캐릭터 레이어(5)보다 높게 */
+    pointer-events: none; /* 클릭 방지 */
+    text-align: center;
+}
+
+.damage-popup {
+    position: relative;
+    display: inline-block;
+    font-size: 28px; /* 숫자 크기 */
+    font-weight: bold;
+    -webkit-text-stroke: 1px #000; /* 글자 테두리 (검은색) */
+    text-stroke: 1px #000;
+    animation: floatAndFade 1s ease-out forwards; /* 1초간 애니메이션 */
+}
+
+/* 데미지 타입별 색상 */
+.damage-popup.normal {
+    color: #ff9933; /* ★ 일반 데미지 (주황색) */
+}
+.damage-popup.critical {
+    color: #ff4d4d; /* ★ 치명타 데미지 (빨간색) */
+}
+.damage-popup.heal {
+    color: #4dff4d; /* 초록색 회복 */
+}
+
+/* 1초간 떠오르며 사라지는 애니메이션 */
+@keyframes floatAndFade {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-40px); /* 40px 위로 이동 */
+    }
+}
+
+/* ▼▼▼ 14. 주간 미션 완료 스타일 (신규) ▼▼▼ */
+.weekly-mission.complete {
+    cursor: pointer;
+    background: #e6ffe6; /* 완료되었지만 아직 클릭 안 함 (연두색) */
+}
+.weekly-mission.complete:hover {
+    background: #c8ffc8;
+}
+.weekly-mission.done {
+    background: #f0f0f0;
+    text-decoration: line-through;
+    color: #888;
+    cursor: not-allowed;
+}
+.weekly-mission.done .progress-bar-fill {
+    background: #bbb;
+}
+
+
+
+
+
+/* ====================================
+   4단계: 새 대시보드 레이아웃 스타일
+   ==================================== */
+
+/* 1. 사이드바 (좌측 고정) */
+#sidebar {
+    position: fixed; /* 화면에 고정 */
+    left: 0;
+    top: 0;
+    width: 90px; /* 사이드바 너비 */
+    height: 100vh; /* 화면 전체 높이 */
+    background-color: #ebd5bc;
+    color: white;
+    padding: 10px;
+    box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
+    z-index: 100; /* 다른 요소보다 위에 */
+}
+
+#sidebar h3 {
+    text-align: center;
+    margin-top: 0;
+    display: none;
+}
+
+/* ▼▼ 수정 후 (Flexbox 기반 아이콘 버튼) */
+#sidebar .nav-btn {
+    display: flex;            /* ★ flex로 변경 */
+    flex-direction: column; /* ★ 세로 정렬 (아이콘 + 텍스트) */
+    align-items: center;    /* ★ 가로 중앙 정렬 */
+    justify-content: center;/* ★ 세로 중앙 정렬 */
+    width: 100%;
+    height: 75px;           /* ★ 고정 높이 부여 */
+    padding: 10px 0;        /* ★ 상하 패딩 */
+    margin-bottom: 10px;
+    background-color: transparent; /* ★ 평소엔 투명하게 */
+    color: #eee;            /* ★ 텍스트 기본 색상 */
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;     /* ★ 좀 더 둥글게 */
+    /* text-align: left; */  /* 🚨 삭제 */
+}
+
+#sidebar .nav-btn:hover {
+    background-color: #555; /* ★ 호버 시에만 색상 표시 */
+}
+
+#sidebar .nav-btn.active {
+    background-color: #007bff; /* ★ 활성화 시 색상 (유지) */
+    color: #fff;
+}
+
+/* 2. 메인 콘텐츠 영역 (우측) */
+#main-content {
+    margin-left: 90px; /* 사이드바 너비만큼 왼쪽 여백 */
+    padding: 20px;
+    /* ★ 기존 .app의 배경화면을 여기에 적용합니다 */
+    background: #fff url('images/homebackground.png') center/cover no-repeat;
+    min-height: calc(100vh - 40px); /* 100vh에서 위아래 padding(20+20) 제외 */
+}
+
+/* 3. 창(Window) 기본 스타일 */
+.window {
+    display: none; /* 기본적으로 모든 창 숨기기 */
+    background: rgba(255, 255, 255, 0.9); /* ★ 콘텐츠 가독성을 위한 반투명 흰색 배경 */
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.window.active {
+    display: block; /* 'active' 클래스가 붙은 것만 보여주기 */
+}
+
+/* 4. 탭(Tab) 메뉴 스타일 */
+.tab-nav {
+    border-bottom: 2px solid #ccc;
+    margin-bottom: 20px;
+}
+
+.tab-nav .tab-btn {
+    padding: 10px 15px;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    color: #555;
+}
+
+.tab-nav .tab-btn.active, .tab-nav .tab-btn:hover {
+    color: #007bff;
+    border-bottom: 2px solid #007bff;
+    margin-bottom: -2px; /* 아래쪽 테두리와 겹치게 */
+}
+
+.tab-content {
+    display: none; /* 탭 내용도 기본 숨김 */
+}
+
+.tab-content.active {
+    display: block; /* 활성화된 탭 내용만 보임 */
+}
+
+/* ====================================
+   '내 정보' 탭 UI 개편 (스케치 기반)
+   ==================================== */
+
+#info-tab-stats-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    padding: 20px; /* ★ 10px -> 20px (배경색이 생겨서 여백 추가) */
+    max-width: 700px; /* ✅ 420px -> 700px (충분히 넓게 변경) */
+    margin: 0 auto;
+    
+    /* ▼▼▼ 2줄 추가 ▼▼▼ */
+    background-color: #f7f3e8; /* ✅ 연한 갈색/베이지색 배경 */
+    border-radius: 8px; /* ✅ 배경 모서리 둥글게 */
+}
+
+/* 8. 코인 박스 (상단) */
+#info-coin-box {
+    width: 200px;
+    font-size: 16px;
+    font-weight: bold;
+}
+.info-box-coin {
+    background-color: #fffbe6; /* 노란색 배경 */
+    border-color: #f0c36d; /* 노란색 테두리 */
+}
+
+/* 중앙 섹션 (장비, 캐릭터, 물약) */
+#info-middle-section {
+    display: flex;
+    justify-content: space-between; /* 양쪽으로 정렬 */
+    align-items: center;
+    width: 100%;
+    gap: 10px;
+}
+
+/* 1. 캐릭터 박스 (중앙) */
+#info-middle-section .character-box {
+    width: 180px; /* 스케치에 맞게 크기 조절 (기존 260px) */
+    height: 180px;
+    margin: 0; /* 기존 margin 제거 */
+    border-width: 3px;
+    flex-shrink: 0; /* 크기 유지 */
+   position: relative; /* ✅ 이 줄 추가 */
+    left: -35px;        /* ✅ 이 줄 추가 (- 값은 왼쪽으로 이동) */
+}
+
+/* 2. 장비 슬롯 (왼쪽) */
+#info-equip-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.info-equip-slot {
+    width: 50px;
+    height: 50px;
+    border: 2px solid #e0e0e0; /* 스케치의 빨간 테두리 대신 회색 */
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.7);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer; /* 장비창 열기용 */
+}
+.info-equip-slot:hover {
+    border-color: #007bff;
+    background-color: #f4f4f4;
+}
+
+/* 3. 물약 슬롯 (오른쪽) */
+#info-potion-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.info-potion-slot {
+    width: 50px;
+    height: 50px;
+    border: 2px solid #e0e0e0;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.7);
+    position: relative; /* 카운트 배치를 위함 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    box-sizing: border-box;
+}
+.info-potion-slot img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.info-item-count {
+    position: absolute;
+    bottom: 2px;
+    right: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #333;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 0 3px;
+    border-radius: 2px;
+}
+
+/* 4. 스킬 슬롯 */
+#info-skill-slots {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 50px;
+}
+.info-skill-slot {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #aaa; /* 원형 테두리 */
+    border-radius: 50%; /* 원형 */
+    background-color: #f0f0f0;
+    background-size: 70%;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* 5. 레벨 박스 */
+#info-level-box {
+    border: 2px solid #333;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    width: 250px;
+
+    box-sizing: border-box;
+}
+
+/* 6. 경험치바 */
+#info-xp-section {
+    width: 250px;
+    text-align: center;
+}
+#info-xp-section .exp-bar {
+    width: 100%; /* 부모 너비(250px)에 맞춤 */
+    margin: 0; /* 기존 margin 제거 */
+}
+.info-xp-text {
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+/* 7. 스탯 박스 (공통) */
+#info-stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    flex-wrap: wrap; /* 화면 작아지면 줄바꿈 */
+}
+.info-box-stat {
+    border: 2px solid #888;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    flex: 1; /* 1/5씩 나눠가짐 */
+    min-width: 80px; /* 최소 너비 */
+    box-sizing: border-box;
+}
+.info-box-stat span {
+    display: block;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 4px;
+}
+
+/* HP/MP 특별 스타일 */
+.info-box-hp {
+    background-color: #ffebee; /* 빨간색 배경 */
+    border-color: #ff5252; /* 빨간색 테두리 */
+}
+.info-box-mp {
+    background-color: #e3f2fd; /* 파란색 배경 */
+    border-color: #448aff; /* 파란색 테두리 */
+}
+
+
+/* ====================================
+   '던전' UI 개편 (스케치 기반)
+   ==================================== */
+
+/* --- 1. 상단 정보 바 --- */
+#dungeon-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px; /* 큰 캐릭터와 간격 */
+}
+
+/* 플레이어/몬스터 정보 박스 (공통) */
+.dungeon-info-box {
+    display: flex;
+    gap: 10px;
+    border: 3px solid #333; /* 스케치 테두리 */
+    border-radius: 8px;
+    padding: 10px;
+    flex: 1; /* 1:1 비율 */
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.profile-pic {
+    width: 60px;
+    height: 60px;
+    border: 2px solid #555;
+    border-radius: 4px;
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+}
+
+.stats-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.level-name {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+/* VS 사인 */
+#vs-sign {
+    width: 50px;
+    height: 50px;
+    border: 3px solid #333;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+/* --- 2. 뒤로가기 버튼 (우측 상단) --- */
+.escape-btn-corner {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    border: 2px solid #555;
+    border-radius: 4px;
+    background: #f0f0f0;
+    font-size: 24px; /* 화살표 아이콘 크기 */
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 40px; /* 아이콘 중앙 정렬 */
+}
+.escape-btn-corner:hover {
+    background: #e0e0e0;
+}
+.escape-btn-corner:disabled {
+    background: #ccc;
+    opacity: 0.7;
+}
+
+
+/* --- 3. 기존 요소 스타일 오버라이드 (덮어쓰기) --- */
+
+/* 던전 h1 숨기기 (스케치에 없음) */
+#window-dungeon > h1 {
+    display: none;
+}
+
+/* 큰 캐릭터 박스 (battle-box) 여백 조정 */
+.battle-box {
+    margin-top: 10px; /* 상단바가 생겼으므로 여백 줄임 */
+}
+
+/* 스케치에 맞게 HP/MP 바 스타일 변경 */
+.hp-bar, .mp-bar {
+    width: 100%;
+    /* height: 18px; */ /* 🚨 높이 고정 삭제 (자식 크기에 맞게 자동 조절) */
+    border: 2px solid #333;
+    margin: 2px 0;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #eee;
+    
+    /* ▼▼▼ 2줄 추가 ▼▼▼ */
+    display: flex; /* 자식 요소(fill, text)를 배치하기 위함 */
+    flex-direction: column; /* 세로로 쌓기 (게이지, 그 밑에 텍스트) */
+}
+
+.hp-bar-text, .mp-bar-text {
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    padding: 2px 0;
+}
+
+/* HP 바 (빨간색) */
+#player-hp-bar-top, #monster-hp-bar-top {
+    border-color: #ff5252; /* 빨간색 테두리 */
+}
+.hp-fill {
+    background: #ffcdd2;
+    border-right: 2px solid #ff5252; /* 게이지 끝선 */
+    box-sizing: border-box;
+    height: 18px;
+}
+
+/* MP 바 (파란색) */
+#player-mp-bar-top {
+    border-color: #448aff; /* 파란색 테두리 */
+}
+.mp-fill {
+    background: #bbdefb;
+    border-right: 2px solid #448aff; /* 게이지 끝선 */
+    box-sizing: border-box;
+    height: 18px;
+}
+
+/* action-row (공격/물약 버튼)은 그대로 유지 */
+
+/* common-skill-row (5개로 늘어남) */
+.common-skill-row {
+    gap: 15px; /* 5개가 들어가도록 간격 살짝 줄임 */
+}
+
+/* battle-log (채팅창)은 그대로 유지 */
+
+/* ▼▼▼ 아이콘 버튼 내부 스타일 (신규) ▼▼▼ */
+#sidebar .nav-btn img {
+    width: 32px; /* 아이콘 크기 */
+    height: 32px;
+    margin-bottom: 5px; /* 아이콘과 텍스트 간격 */
+    object-fit: contain;
+    pointer-events: none; /* 이미지가 클릭 이벤트 방해하지 않도록 */
+}
+#sidebar .nav-btn span {
+    font-size: 12px;
+    font-weight: 600;
+    pointer-events: none; /* 텍스트가 클릭 이벤트 방해하지 않도록 */
+}
+
+
+
+/* ====================================
+   관리자용 숨겨진 버튼 (신규)
+   ==================================== */
+/* ▼▼▼ 1. 새 컨테이너 스타일 추가 ▼▼▼ */
+#admin-controls-container {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 101; /* 팝업(999)보다 높게 */
+    display: flex;
+    gap: 8px; /* 버튼 사이 간격 */
+}
+
+.admin-hidden-btn {
+    width: 44px;
+    height: 44px;
+    background: #fff;
+    border: 2px solid #aaa;
+    border-radius: 50%; /* 원형 */
+    font-size: 20px;
+    cursor: pointer; 
+    opacity: 0; /* ★ 평소에는 숨김 */
+    transition: opacity 0.2s;
+}
+
+
+.admin-hidden-btn:hover {
+    opacity: 1; /* ★ 마우스를 올리면 보이게 */
+}
+
+
+
+
+
+/* ====================================
+   '일일 미션' 탭 UI 개편 (스케치 기반)
+   ==================================== */
+
+/* --- 1. 상단 통계 --- */
+.stats-top-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+.stat-box {
+    flex: 1;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    background: #fdfdfd;
+}
+.stat-box h4 {
+    text-align: center;
+    margin: 0 0 10px 0;
+    font-size: 16px;
+}
+.chart-container {
+    position: relative; /* 텍스트를 겹치기 위함 */
+    height: 120px;
+    width: 120px; /* 도넛 크기 고정 */
+    margin: 0 auto;
+}
+.donut-chart-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+}
+.all-clear-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 120px;
+}
+.all-clear-box span {
+    font-size: 80px;
+    font-weight: 900;
+    color: #3f51b5;
+}
+
+/* --- 2. 카테고리 필터 --- */
+.filter-nav {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+}
+.filter-btn {
+    flex: 1;
+    padding: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    background: #f0f0f0;
+    cursor: pointer;
+    border-right: 1px solid #ccc;
+}
+.filter-btn:last-child {
+    border-right: none;
+}
+.filter-btn:hover {
+    background: #e0e0e0;
+}
+.filter-btn.active {
+    background: #3f51b5;
+    color: white;
+}
+
+
+/* --- 4. 하단 통계 --- */
+.stats-divider {
+    border: none;
+    border-top: 2px dashed #ccc;
+    margin: 30px 0;
+}
+.stats-bottom-row {
+    display: flex;
+    gap: 20px;
+}
+.stats-box-half {
+    flex: 1;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    background: #fdfdfd;
+    min-height: 250px; /* 높이 맞춤 */
+}
+.stats-box-half h4 {
+    text-align: center;
+    margin: 0 0 10px 0;
+}
+
+/* --- 5. 카테고리 비율 --- */
+.pie-chart-container {
+  display: flex;
+  justify-content: center; /* ✅ 가운데 정렬 */
+  align-items: center; /* ✅ 세로축도 가운데 */
+  width: 100%;
+  height: 300px; /* ✅ 네모 칸 높이 (필요시 조정 가능) */
+  gap: 20px;
+}
+
+.pie-chart-container canvas {
+  aspect-ratio: 1 / 1; /* ✅ 정원 유지 */
+  max-width: 70%; /* ✅ 전체 박스 대비 크기 조절 */
+  height: auto;
+}
+
+#pie-legend {
+    /* flex: 1; */ /* 🚨 이 줄을 삭제하거나 주석 처리 */
+    width: 150px; /* ✅ 범례가 차지할 너비를 고정 */
+    font-size: 14px;
+    flex-shrink: 0; /* ✅ 공간이 좁아도 줄어들지 않게 함 */
+}
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+.legend-color-box {
+    width: 16px;
+    height: 16px;
+    border: 1px solid #555;
+    margin-right: 8px;
+}
+
+/* --- 6. 달력 --- */
+.calendar-container {
+    width: 100%;
+}
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.calendar-header span {
+    font-size: 18px;
+    font-weight: bold;
+}
+.calendar-header button {
+    font-size: 16px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+}
+#mission-calendar {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+#mission-calendar th, #mission-calendar td {
+    border: 1px solid #ddd;
+    text-align: center;
+    height: 40px;
+    padding: 2px;
+    vertical-align: top;
+    font-size: 11px;
+}
+#mission-calendar th {
+    background: #f4f4f4;
+    font-size: 12px;
+    padding: 5px 2px;
+}
+#mission-calendar td.other-month {
+    color: #ccc;
+    background: #f9f9f9;
+}
+#mission-calendar .day-number {
+    font-weight: bold;
+}
+#mission-calendar .day-count {
+    font-size: 14px;
+    font-weight: bold;
+    color: #ff6600; /* 주황색 글씨 */
+    margin-top: 2px;
+    display: block;
+}
+#mission-calendar .day-count-icon {
+    width: 24px;
+    height: 24px;
+    margin: 2px auto 0 auto;
+    display: block;
+}
+
+/* ====================================
+   상점 코인 표시줄 (신규)
+   ==================================== */
+#shop-coin-display {
+    width: 300px;
+    margin: 0 auto 20px auto; /* 위/아래 여백, 가로 중앙 정렬 */
+    font-size: 18px;
+    padding: 10px;
+}
+
+/* ====================================
+   상점 물약 개수 오버레이 (신규)
+   ==================================== */
+.shop-item-icon.item-with-count {
+    position: relative; /* 자식 요소의 absolute 위치 기준 */
+}
+
+.item-count-overlay {
+    position: absolute;
+    bottom: 0px; /* 우측 하단 */
+    right: 0px; /* 우측 하단 */
+    background-color: rgba(0, 0, 0, 0.7); /* 반투명 검은색 배경 */
+    color: white;
+    padding: 3px 6px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    min-width: 25px; /* 한 자리 숫자도 잘 보이게 */
+    text-align: center;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* 그림자 효과 */
+    z-index: 10; /* 이미지 위에 오도록 */
+}
+
+/* ====================================
+   스탯 포인트 시스템 (신규)
+   ==================================== */
+.stat-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    color: #555;
+}
+
+.stat-up-btn {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1px solid #888;
+    background-color: #fff;
+    color: #333;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0;
+    line-height: 16px; /* 수직 중앙 정렬 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-up-btn:hover {
+    background-color: #eee;
+    border-color: #333;
+}
+
+.stat-up-btn:disabled {
+    background-color: #e0e0e0;
+    color: #aaa;
+    border-color: #ccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* ====================================
+   📱 모바일 반응형 스타일 (화면 폭 768px 이하)
+   ==================================== */
+@media (max-width: 768px) {
+
+    /* 1. 사이드바를 하단 내비게이션 바로 변경 */
+    #sidebar {
+        width: 100%;
+        height: 60px;
+        bottom: 0;
+        top: auto;
+        left: 0;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        padding: 0;
+        z-index: 1000;
+    }
+
+    #sidebar .nav-btn {
+        height: 100%;
+        width: auto;
+        flex: 1;
+        margin: 0;
+        border-radius: 0;
+        padding: 5px 0;
+    }
+    
+    #sidebar .nav-btn img {
+        width: 24px;
+        height: 24px;
+        margin-bottom: 2px;
+    }
+    
+    #sidebar .nav-btn span {
+        font-size: 10px;
+    }
+
+    /* 2. 메인 콘텐츠 영역 조정 */
+    #main-content {
+        margin-left: 0; /* 사이드바 공간 제거 */
+        margin-bottom: 60px; /* 하단 바 공간 확보 */
+        padding: 10px;
+        min-height: calc(100vh - 60px);
+    }
+
+    /* 3. '내 정보' 탭 레이아웃 조정 */
+    #info-middle-section {
+        flex-direction: column; /* 세로 정렬로 변경 */
+        gap: 20px;
+    }
+    
+    #info-middle-section .character-box {
+        /* 캐릭터 박스 크기 유지 또는 약간 축소 */
+        transform: scale(0.9); 
+    }
+
+    #info-equip-slots, #info-potion-slots {
+        flex-direction: row; /* 장비/물약 슬롯을 가로로 */
+        gap: 10px;
+    }
+
+    /* 4. 스탯 박스 크기 조정 */
+    .info-box-stat {
+        min-width: 30%; /* 한 줄에 3개씩 나오도록 */
+        font-size: 12px;
+        padding: 5px;
+    }
+    
+    /* 5. 미션/던전/상점 등 기타 조정 */
+    .mission-grid {
+        grid-template-columns: 1fr; /* 미션 목록 1열로 */
+    }
+    
+    .stats-top-row, .stats-bottom-row {
+        flex-direction: column; /* 통계 박스 세로 정렬 */
+    }
+    
+    .dungeon-info-box {
+        padding: 5px;
+    }
+    
+    .profile-pic {
+        width: 40px;
+        height: 40px;
+    }
+    
+    /* 6. 글씨 크기 전반적 축소 */
+    body {
+        font-size: 14px;
+    }
+    h2 {
+        font-size: 20px;
+    }
+
+
+
+}
+
+
+/* ====================================
+   주간 미션 (2x2 그리드)
+   ==================================== */
+#weekly-grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 2열 */
+    gap: 15px;
+    padding: 10px;
+}
+
+.weekly-card {
+    background: #fff;
+    border: 2px solid #ccc;
+    border-radius: 12px;
+    padding: 15px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.weekly-card h4 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+}
+
+.weekly-chart-wrapper {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin-bottom: 10px;
+}
+
+.weekly-chart-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+.weekly-reward-btn {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.weekly-reward-btn.active {
+    background-color: #3f51b5;
+    color: white;
+    animation: pulse 1.5s infinite;
+}
+
+.weekly-reward-btn:disabled {
+    background-color: #eee;
+    color: #aaa;
+    cursor: not-allowed;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+/* ====================================
+   몬스터 도감 스타일 (신규)
+   ==================================== */
+#monster-book-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* 5열 */
+    gap: 8px; /* 칸 사이 간격 */
+    padding: 10px;
+    background: #f0f0f0;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.book-slot {
+    aspect-ratio: 1 / 1; /* 정사각형 유지 */
+    background-color: #fff;
+    border: 2px solid #ccc;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.book-slot img {
+    width: 90%;
+    height: 90%;
+    object-fit: contain;
+}
+
+.book-slot.empty {
+    background-color: #ddd; /* 비어있을 때 회색 */
+}
+
+.book-slot.empty::after {
+    content: '?';
+    font-size: 24px;
+    font-weight: bold;
+    color: #999;
+}	
+
+
+
+/* ====================================
+   인벤토리 스타일 (신규)
+   ==================================== */
+.inv-category-nav {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 15px;
+    background: #eee;
+    border-radius: 8px;
+    padding: 5px;
+}
+
+.inv-cat-btn {
+    border: none;
+    background: transparent;
+    padding: 8px 12px;
+    font-weight: bold;
+    color: #555;
+    cursor: pointer;
+    border-radius: 5px;
+    flex: 1;
+}
+
+.inv-cat-btn.active {
+    background: #3f51b5;
+    color: white;
+}
+
+#inventory-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7열 */
+    grid-template-rows: repeat(10, 1fr);   /* 10행 */
+    gap: 5px;
+    padding: 10px;
+    background: #e8e8e8;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    /* 7x10 비율 유지하면서 스크롤 없이 보이게 하거나 스크롤 생성 */
+    max-height: 500px; 
+    overflow-y: auto; 
+}
+
+.inv-slot {
+    aspect-ratio: 1 / 1; /* 정사각형 */
+    background-color: #fff;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.inv-slot img {
+    width: 90%;
+    height: 90%;
+    object-fit: contain;
+}
+
+.inv-count-badge {
+    position: absolute;
+    bottom: 0px;
+    right: 5px;
+    background: none; /* ✅ 검정 배경 제거 */
+    color: #000; /* ✅ 글자색 검정 (또는 원하시는 색) */
+    font-size: 20px; /* ✅ 글자 크기 확대 */
+    font-weight: bold;
+    padding: 0;
+    /* 아이템 이미지와 겹쳐도 잘 보이도록 흰색 테두리(그림자) 효과 추가 */
+    text-shadow: 
+        -1px -1px 0 #fff,  
+        1px -1px 0 #fff,
+        -1px 1px 0 #fff,
+        1px 1px 0 #fff;
+    pointer-events: none;
+}
+
+/* ====================================
+   UI 개선 (폰트, 데미지 색상)
+   ==================================== */
+
+/* 1. 선택창(탭 버튼) 폰트 적용 및 진하게 */
+.tab-nav .tab-btn,
+.inv-category-nav .inv-cat-btn {
+    /* body에 적용된 폰트를 강제로 상속받게 함 */
+    font-family: 'Paperozi', "Malgun Gothic", sans-serif; 
+    font-weight: 900; /* 아주 진하게 */
+    font-size: 18px;  /* 글자 크기 약간 확대 */
+    color: #555;      /* 기본 색상 */
+}
+
+/* 활성화된 탭은 더 진하고 색상 변경 */
+.tab-nav .tab-btn.active,
+.inv-category-nav .inv-cat-btn.active {
+    color: #3f51b5;
+    font-weight: 900;
+    border-bottom-width: 3px; /* 테두리도 두껍게 */
+}
+
+
+/* 2. 데미지 폰트 가시성 개선 */
+.damage-popup {
+    /* 기존의 검정 테두리(text-stroke) 제거 -> 이게 색을 가렸을 수 있음 */
+    -webkit-text-stroke: 0;
+    text-stroke: 0;
+
+    /* 글자 밖으로 검은 그림자를 주어 색상을 살림 */
+    text-shadow: 
+        -2px -2px 0 #000,  
+        2px -2px 0 #000,
+        -2px 2px 0 #000,
+        2px 2px 0 #000;
+    
+    font-weight: 900; /* 폰트 두께 최대 */
+    z-index: 9999; /* 확실하게 맨 위에 표시 */
+}
+
+/* 일반 데미지: 주황색 */
+.damage-popup.normal {
+    color: #ff9900 !important; /* 선명한 주황색 */
+    font-size: 32px; /* 크기 확대 */
+}
+
+/* 치명타 데미지: 빨간색 */
+.damage-popup.critical {
+    color: #ff0000 !important; /* 완전한 빨간색 */
+    font-size: 40px; /* 더 크게 강조 */
+}
+
+/* 회복: 초록색 */
+.damage-popup.heal {
+    color: #00ff00 !important;
+    font-size: 32px;
+}
+
+
+/* ====================================
+   폰트 및 텍스트 색상 버그 수정 (신규)
+   ==================================== */
+
+/* 1. 상점, 미션 필터, 인벤토리 탭 버튼 폰트 강제 적용 */
+.shop-tab-btn, 
+.filter-btn, 
+.inv-cat-btn {
+    font-family: 'Paperozi', "Malgun Gothic", sans-serif !important; /* 폰트 강제 */
+    font-weight: 900;
+}
+
+/* 2. 인벤토리 활성 탭 텍스트 색상 수정 */
+/* (파란 배경 위에서 글자가 잘 보이도록 흰색으로 변경) */
+.inv-cat-btn.active {
+    color: #ffffff !important; 
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3); /* 가독성을 위한 그림자 */
+}
+
+/* 3. 미션 필터 버튼 활성 상태 텍스트 색상 */
+.filter-btn.active {
+    color: #ffffff !important;
+}
+
+/* 4. 상점 탭 버튼 활성 상태 텍스트 색상 (기존 유지하되 폰트만 적용) */
+.shop-tab-btn.active {
+    /* color: #3f51b5; (기존 색상 유지) */
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script> </head>
+
+
+<body>
+<nav id="sidebar">
+<h3>Routine RPG</h3> <button class="nav-btn active" data-target="window-info" title="나의 정보">
+        <img src="images/icon1.png" alt="나의 정보">
+        
+    </button>
+    
+    <button class="nav-btn" data-target="window-missions" title="미션">
+        <img src="images/icon2.png" alt="미션">
+        
+    </button>
+    
+    <button class="nav-btn" data-target="window-dungeon" title="던전">
+        <img src="images/icon3.png" alt="던전">
+        
+    </button>
+    
+    <button class="nav-btn" data-target="window-shop" title="상점">
+        <img src="images/icon4.png" alt="상점">
+        
+    </button>
+    
+    <button class="nav-btn" data-target="window-settings" title="설정">
+        <img src="images/icon5.png" alt="설정">
+        
+    </button>
+</nav>
+
+<main id="main-content">
+
+    <div id="window-info" class="window active">
+        <h2>나의 정보</h2>
+        <div class="tab-nav">
+            <button class="tab-btn active" data-target="info-tab-stats">내 정보</button>
+            <button class="tab-btn" data-target="info-tab-inventory">인벤토리</button>
+            <button class="tab-btn" data-target="info-tab-skills">스킬</button>
+            <button class="tab-btn" data-target="info-tab-titles">칭호</button>
+            <button class="tab-btn" data-target="info-tab-book">도감</button>
+            
+        </div>
+<div id="info-tab-inventory" class="tab-content">
+            <div class="inv-category-nav">
+                <button class="inv-cat-btn active" onclick="renderInventory('weapon')">무기</button>
+                <button class="inv-cat-btn" onclick="renderInventory('top')">상의</button>
+                <button class="inv-cat-btn" onclick="renderInventory('bottom')">하의</button>
+                <button class="inv-cat-btn" onclick="renderInventory('shield')">방패</button>
+                <button class="inv-cat-btn" onclick="renderInventory('consumable')">소비</button>
+            </div>
+            
+            <div id="inventory-grid">
+                </div>
+        </div>
+<div id="info-tab-titles" class="tab-content">
+<div id="titleList" style="display: flex; flex-direction: column; gap: 12px; max-height: 450px; overflow-y: auto; padding: 5px;"></div>
+             </div>
+
+        <div id="info-tab-book" class="tab-content">
+            <h3>몬스터 도감 (수집: <span id="book-collection-count">0</span>/30)</h3>
+            <div id="monster-book-grid">
+                </div>
+        </div>
+        
+        <div id="info-tab-stats" class="tab-content active">
+<div id="info-tab-stats-container">
+
+        <div id="info-coin-box" class="info-box-stat info-box-coin">
+            🪙 코인	 <span id="info-coin-text">0</span>
+        </div>
+
+        <div id="info-middle-section">
+            <div id="info-equip-slots">
+                <div class="info-equip-slot" id="info-slot-top" title="장비창 열기"></div>
+                <div class="info-equip-slot" id="info-slot-bottom" title="장비창 열기"></div>
+                <div class="info-equip-slot" id="info-slot-weapon" title="장비창 열기"></div>
+                <div class="info-equip-slot" id="info-slot-shield" title="장비창 열기"></div>
+            </div>
+
+            <div class="character-box" id="characterBox">
+                <img id="charLayer_Base" src="" style="z-index: 1;">
+                <img id="charLayer_Bottom" src="" style="z-index: 2;">
+                <img id="charLayer_Top" src="" style="z-index: 3;">
+                <img id="charLayer_Shield" src="" style="z-index: 4;">
+                <img id="charLayer_Weapon" src="" style="z-index: 5;">
+            </div>
+
+            <div id="info-potion-slots">
+                <div class="info-potion-slot">
+                    <img src="images/bottle.png" alt="HP 물약">
+                    <span id="info-potion-count" class="info-item-count">0</span>
+                </div>
+                <div class="info-potion-slot">
+                    <img src="images/bottle2.png" alt="MP 물약">
+                    <span id="info-mp-potion-count" class="info-item-count">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="info-skill-slots">
+            <div class="info-skill-slot" id="info-skill-1" title="(비어있음)"></div>
+            <div class="info-skill-slot" id="info-skill-2" title="(비어있음)"></div>
+            <div class="info-skill-slot" id="info-skill-3" title="(비어있음)"></div>
+            <div class="info-skill-slot" id="info-skill-4" title="(비어있음)"></div>
+            <div class="info-skill-slot" id="info-skill-5" title="(비어있음)"></div>
+        </div>
+
+<div id="info-level-container" style="width: 250px; display: flex; flex-direction: column; align-items: center; gap: 5px;">
+            
+            <div id="equippedTitleDisplay" style="font-size: 16px; font-weight: bold; color: #3f51b5; height: 20px;"></div>
+            
+<div style="width: 260px; display: flex; flex-direction: column; align-items: center; gap: 5px;">
+            
+            <div id="equippedTitleDisplay" style="font-size: 16px; font-weight: bold; color: #3f51b5; height: 20px; text-align: center;"></div>
+            
+            <div style="display: flex; width: 100%; gap: 8px;">
+                
+                <div style="flex: 1; border: 2px solid #333; border-radius: 6px; background: #fff; padding: 8px; text-align: center; display: flex; align-items: center; justify-content: center;">
+                    <span id="levelTag" style="font-size: 18px; font-weight: bold;">Lv.1 초보자</span>
+                </div>
+
+                <div style="width: 80px; border: 2px solid #ff5722; border-radius: 6px; background: #fff; padding: 8px; text-align: center; display: flex; align-items: center; justify-content: center;">
+                    <span id="spDisplay" style="font-size: 14px; font-weight: bold; color: #ff5722;">SP: 0</span>
+                </div>
+
+            </div>
+
+        </div>
+        </div>
+
+        <div id="info-xp-section">
+             <div class="exp-bar">
+                <div class="exp-fill" id="expFill"></div>
+            </div>
+            <div id="expText" class="info-xp-text">0/100 (0%)</div>
+        </div>
+
+        <div id="info-stats-row">
+            <div class="info-box-stat info-box-hp">
+                <div class="stat-header">HP <button class="stat-up-btn" onclick="investStat('hp')">+</button></div>
+                <span id="hpTextMain">0/0</span>
+            </div>
+            <div class="info-box-stat info-box-mp">
+                <div class="stat-header">MP <button class="stat-up-btn" onclick="investStat('mp')">+</button></div>
+                <span id="mpTextMain">0/0</span>
+            </div>
+            <div class="info-box-stat">
+                <div class="stat-header">공격력 <button class="stat-up-btn" onclick="investStat('atk')">+</button></div>
+                <span id="atkText">0</span>
+            </div>
+            <div class="info-box-stat">
+                <div class="stat-header">방어력 <button class="stat-up-btn" onclick="investStat('def')">+</button></div>
+                <span id="defText">0</span>
+            </div>
+            <div class="info-box-stat">
+                <div class="stat-header">치명타 <button class="stat-up-btn" onclick="investStat('crit')">+</button></div>
+                <span id="critText">0%</span>
+            </div>
+        </div>
+
+    </div>
+
+
+
+
+
+
+            </div>
+        <div id="info-tab-skills" class="tab-content">
+		<div id="skillList" style="display:flex; flex-direction:column; gap:12px; max-height: 400px; overflow-y: auto; padding: 5px;"></div>
+            </div>
+        <div id="info-tab-titles" class="tab-content">
+		<div id="titleList" style="display: flex; flex-direction: column; gap: 12px; max-height: 450px; overflow-y: auto; padding: 5px;"></div>
+            </div>
+    </div>
+
+<div id="window-missions" class="window">
+        <h2>미션</h2>
+        <div class="tab-nav">
+            <button class="tab-btn active" data-target="mission-tab-daily">일일 미션</button>
+            <button class="tab-btn" data-target="mission-tab-weekly">주간 미션</button>
+        </div>
+        
+        <div id="mission-tab-daily" class="tab-content active">
+            <div class="stats-top-row">
+                <div class="stat-box">
+                    <h4>진행도</h4>
+                    <div class="chart-container" style="height: 120px;">
+                        <canvas id="donutChart"></canvas>
+                        <div class="donut-chart-text" id="donut-chart-text">0/12</div>
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <h4>모두 완료 횟수</h4>
+                    <div class="all-clear-box">
+                        <span id="all-clear-count">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-nav" id="mission-filter-nav">
+                <button class="filter-btn active" data-category="ALL">ALL</button>
+                <button class="filter-btn" data-category="exercise">운동</button>
+                <button class="filter-btn" data-category="diet">식단</button>
+                <button class="filter-btn" data-category="study">공부</button>
+                <button class="filter-btn" data-category="rest">휴식</button>
+            </div>
+
+            <div class="mission-grid" id="missionGrid">
+            </div>
+            
+            <hr class="stats-divider">
+
+            <div class="stats-bottom-row">
+                <div class="stats-box-half">
+                    <h4>카테고리별 비율</h4>
+                    <div class="pie-chart-container">
+                        <canvas id="pieChart"></canvas>
+                        <div id="pie-legend">
+                        </div>
+                    </div>
+                </div>
+                <div class="stats-box-half"> <h4>완료 달력</h4>
+                    <div class="calendar-container">
+                        <div class="calendar-header">
+                            <button id="cal-prev-btn">◀</button>
+                            <span id="cal-month-year">2025 / 11</span>
+                            <button id="cal-next-btn">▶</button>
+                        </div>
+                        <table id="mission-calendar">
+                            <thead>
+                                <tr><th>일</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th></tr>
+                            </thead>
+                            <tbody id="mission-calendar-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div> <div id="mission-tab-weekly" class="tab-content">
+            <div class="weekly-mission-section">
+                <h3>주간 미션 (매주 월요일 초기화)</h3>
+                <div id="weekly-grid-container"></div>
+            </div>
+        </div> </div>
+
+
+
+
+
+
+    <div id="window-dungeon" class="window">
+<div id="dungeon-top-bar">
+        
+        <div class="dungeon-info-box" id="player-info-top">
+            <div class="profile-pic" id="playerImg_profile"></div>
+            <div class="stats-details">
+                <div class="level-name">Lv.<span id="pLv"></span> <span id="pName">플레이어</span></div>
+                <div class="hp-bar" id="player-hp-bar-top">
+                    <div class="hp-fill" id="pHpFill"></div>
+                </div>
+                <div class="hp-bar-text" id="pHpText">0/0</div>
+                <div class="mp-bar" id="player-mp-bar-top">
+                    <div class="mp-fill" id="pMpFill"></div>
+                </div>
+                <div class="mp-bar-text" id="pMpText">0/0</div>
+            </div>
+        </div>
+
+        <div id="vs-sign">VS</div>
+
+        <div class="dungeon-info-box" id="monster-info-top">
+            <div class="profile-pic" id="monImg_profile"></div>
+            <div class="stats-details">
+                <div class="level-name">Lv.<span id="mLv"></span> 몬스터</div>
+                <div class="hp-bar" id="monster-hp-bar-top">
+                    <div class="hp-fill" id="mHpFill"></div>
+                </div>
+                <div class="hp-bar-text" id="mHpText">0/0</div>
+            </div>
+        </div>
+
+    </div>
+
+    <button id="escapeBtn" class="escape-btn-corner">↩</button>
+
+
+    <h1>던전 전투</h1> <div class="battle-box">
+        <div>
+            <div style="position:relative;">
+                <div class="battle-char" id="playerImg">
+                    <img id="dungeonLayer_Base" src="" style="z-index: 1;">
+                    <img id="dungeonLayer_Bottom" src="" style="z-index: 2;">
+                    <img id="dungeonLayer_Top" src="" style="z-index: 3;">
+                    <img id="dungeonLayer_Shield" src="" style="z-index: 4;">
+                    <img id="dungeonLayer_Weapon" src="" style="z-index: 5;">
+                    <div class="damage-popup-container" id="playerDamageContainer"></div>
+                </div>
+                <div class="battle-effect-overlay" id="playerEffect"></div>
+            </div>
+            </div>
+        
+        <div>
+            <div style="position:relative;">
+                <div class="battle-mon" id="monImg">
+                    <div class="damage-popup-container" id="monsterDamageContainer"></div>
+                </div>
+                <div class="battle-effect-overlay" id="monsterEffect"></div>
+            </div>
+            </div>
+    </div>
+
+    <div class="action-row">
+        <button id="attackBtn" class="action-btn">공격</button>
+        <button id="potionBtn" class="action-btn">HP 물약</button>
+        <button id="mpPotionBtn" class="action-btn">MP 물약</button>
+        </div>
+
+    <div class="common-skill-row">
+        <button class="skill-btn" id="commonSkillBtn1"></button>
+        <button class="skill-btn" id="commonSkillBtn2"></button>
+        <button class="skill-btn" id="commonSkillBtn3"></button>
+        <button class="skill-btn" id="commonSkillBtn4" title="(미구현)"></button>
+        <button class="skill-btn" id="commonSkillBtn5" title="(미구현)"></button>
+    </div>
+
+    <div class="battle-log" id="battleLog"></div>
+
+</div>
+ 
+
+
+
+
+    <div id="window-shop" class="window">
+        <h2>상점</h2>
+<div id="shop-coin-display" class="coin-box">
+            🪙: <span id="shopCoinText">0</span>
+        </div>
+                    <div class="shop-tabs">
+                        <button class="shop-tab-btn active" onclick="showShopTab('weapon')">무기</button>
+                        <button class="shop-tab-btn" onclick="showShopTab('top')">상의</button>
+                        <button class="shop-tab-btn" onclick="showShopTab('bottom')">하의</button>
+                        <button class="shop-tab-btn" onclick="showShopTab('shield')">방패</button>
+                        <button class="shop-tab-btn" onclick="showShopTab('item')">물약</button>
+                    </div>
+                <div id="shopList"></div>
+        </div>
+
+    <div id="window-settings" class="window">
+        <h2>설정</h2>
+        <div class="tab-nav">
+            <button class="tab-btn active" data-target="settings-tab-edit">미션 수정</button>
+            <button class="tab-btn" data-target="settings-tab-io">저장/불러오기</button>
+        </div>
+        
+        <div id="settings-tab-edit" class="tab-content active">
+                <div style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
+                    <table class="edit-mission-table" id="editMissionTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">구분</th>
+                                <th style="width: 40%;">기존 미션</th>
+                                <th style="width: 45%;">변경할 미션 (직접 입력)</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div style="text-align:right;margin-top:12px;">
+                    <button class="btn" id="saveMissionEditsBtn">변경 내용 저장</button>
+                </div>
+
+
+
+             </div>
+        <div id="settings-tab-io" class="tab-content">
+                <div style="margin:10px 0;">
+                    <button class="btn" id="saveBtn">저장</button>
+                    <button class="btn" id="loadBtn">불러오기</button>
+                    
+                </div>
+                <div style="margin-top:12px;font-size:13px;color:#555;">
+
+                </div>
+
+            </div>
+    </div>
+</main>
+
+
+
+
+
+
+<div id="admin-controls-container">
+
+</div>
+
+<div class="modal-bg" id="equipmentModal">
+    <div class="modal equipment-modal" style="background-image: url('images/equiptable.png');">
+        <h2>장비창</h2>    
+        <div class="equip-preview-box">
+            <img id="equipLayer_Base"   src="" style="z-index: 1;">
+            <img id="equipLayer_Bottom" src="" style="z-index: 2;">
+            <img id="equipLayer_Top"    src="" style="z-index: 3;">
+            <img id="equipLayer_Shield" src="" style="z-index: 4;">
+            <img id="equipLayer_Weapon" src="" style="z-index: 5;">
+        </div>
+
+	<div class="equip-slot" id="equipSlot_Top"></div>
+        <div class="equip-slot" id="equipSlot_Bottom"></div>
+        <div class="equip-slot" id="equipSlot_Weapon"></div>
+        <div class="equip-slot" id="equipSlot_Shield"></div>
+
+                <div style="text-align:right; position: absolute; bottom: 18px; right: 18px;">
+            <button class="btn" onclick="closeEquipmentWindow()">닫기</button>
+        </div>
+    </div>
+</div>
+
+
+        <div class="modal-bg" id="dungeonResultModal">
+            <div class="modal-result">
+                <h3>던전 배틀 결과</h3>
+                <div id="dungeonResultContent">
+                    <div class="result-line"><strong>몬스터 처치:</strong> <span id="defeatedMonstersResult"></span></div>
+                    <div class="result-line"><strong>레벨:</strong> <span id="levelChangeResult"></span></div>
+                    <div class="result-line"><strong>획득 코인:</strong> <span id="coinsGainedResult"></span></div>
+                </div>
+                <div class="result-buttons">
+                    <button class="btn" onclick="closeDungeonResultPopup()">확인</button>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="modal-bg" id="rewardPopupModal" style="background: transparent; pointer-events: none;">
+            <div id="rewardPopupContent" style="background: rgba(0, 0, 0, 0.75); color: white; padding: 15px 25px; border-radius: 10px; text-align: center; font-size: 16px; box-shadow: 0 3px 8px rgba(0,0,0,0.3);">
+            </div>
+        </div>
+
+
+
+
+
+
+<script>
+/* ====================================
+   5-1. 새 내비게이션 및 탭 로직
+   ==================================== */
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- 1. 메인 내비게이션 (사이드바) 로직 ---
+    const navButtons = document.querySelectorAll('.nav-btn');
+    const windows = document.querySelectorAll('.window');
+
+    navButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const targetId = button.getAttribute('data-target'); // (예: "window-info")
+            
+            // 모든 버튼에서 'active' 클래스 제거
+            navButtons.forEach(btn => btn.classList.remove('active'));
+            // 클릭한 버튼에 'active' 클래스 추가
+            button.classList.add('active');
+
+            // 모든 창(window) 숨기기
+            windows.forEach(window => {
+                window.classList.remove('active');
+            });
+
+            // 타겟 창(window)만 보여주기
+            const targetWindow = document.getElementById(targetId);
+            if (targetWindow) {
+                targetWindow.classList.add('active');
+            }
+
+            // ★★★ 던전 창을 클릭했을 때만 특별 처리 ★★★
+            if (targetId === 'window-dungeon') {
+                // (기존 dungeonBtn 리스너의 코드를 이곳으로 가져옴)
+                playSound('click.mp3');
+                
+                // mainScreen, dungeonScreen을 숨기고/보이는 코드는 이제 불필요
+                // mainScreen.style.display = "none";
+                // dungeonScreen.style.display = "block";
+
+                dungeonRunStats = {
+                    defeatedMonsters: [], startLevel: player.level, startXp: player.xp,
+                    gainedXp: 0, gainedCoins: 0, levelUps: 0
+                };
+                playerDiedInDungeon = false;
+
+                if (!dungeonBGM) {
+                    try { 
+                        dungeonBGM = new Audio('sounds/dungeonbgm.mp3');
+                        dungeonBGM.loop = true;
+                    } catch (e) {
+                        console.error("BGM 생성 오류:", e);
+                        dungeonBGM = null;
+                    }
+                }
+                if (dungeonBGM) {
+                    dungeonBGM.play().catch(e => console.error("BGM 자동 재생 실패:", e));
+                }
+
+                startBattle(); // ★ 전투 시작
+            }
+            // ★★★ 던전이 아닌 다른 창을 클릭하면 BGM 끄기 ★★★
+            else {
+                if (dungeonBGM) {
+                    dungeonBGM.pause();
+                    dungeonBGM.currentTime = 0;
+                }
+            }
+        });
+
+/* ★ 필터 버튼 리스너
+    const filterButtons = document.querySelectorAll('#mission-filter-nav .filter-btn');
+    // ... (이하 달력 버튼 리스너까지) ...
+    document.getElementById('cal-next-btn').addEventListener('click', () => {
+        currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+        renderCalendar(currentCalendarDate);
+    });
+*/
+
+
+    });
+
+    // --- 2. 탭(Tab) 메뉴 로직 ---
+    const tabButtons = document.querySelectorAll('.tab-btn');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const targetId = button.getAttribute('data-target'); // (예: "info-tab-stats")
+            
+            // 현재 클릭한 탭이 속한 탭 그룹 찾기
+            const tabNav = button.parentElement;
+            const tabContainer = tabNav.parentElement; // (예: #window-info)
+            
+            // 같은 그룹 내의 모든 탭 버튼에서 'active' 제거
+            tabNav.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            // 클릭한 탭 버튼에 'active' 추가
+            button.classList.add('active');
+
+            // 같은 그룹 내의 모든 탭 콘텐츠 숨기기
+            tabContainer.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // 타겟 탭 콘텐츠만 보여주기
+document.getElementById(targetId).classList.add('active');
+            
+            if (targetId === 'info-tab-skills') {
+                renderSkillList(); 
+            } 
+            // ▼▼▼ 이 부분을 추가하세요! ▼▼▼
+            else if (targetId === 'info-tab-titles') {
+                renderTitleList(); // ✅ 칭호 목록 렌더링 함수 호출
+            } 
+            // ▲▲▲ 여기까지 추가 ▲▲▲
+            else if (targetId === 'settings-tab-edit') { 
+                renderMissionEditTable(); 
+            } else if (targetId === 'info-tab-book') {
+                renderMonsterBook();
+            }
+           // ▼▼▼ 이 부분을 추가하세요 ▼▼▼
+            else if (targetId === 'info-tab-inventory') {
+                renderInventory('weapon'); // 기본으로 무기 탭 보여줌
+            }
+            // ▲▲▲ 여기까지 추가 ▲▲▲
+
+
+
+        });
+    });
+
+// ★ 필터 버튼 리스너
+    const filterButtons = document.querySelectorAll('#mission-filter-nav .filter-btn');
+    filterButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            renderMissions(); // 필터 적용하여 미션 목록 새로고침
+        });
+    });
+
+    // ★ 달력 버튼 리스너
+    document.getElementById('cal-prev-btn').addEventListener('click', () => {
+        currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+        renderCalendar(currentCalendarDate);
+    });
+    document.getElementById('cal-next-btn').addEventListener('click', () => {
+        currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+        renderCalendar(currentCalendarDate);
+    });
+
+
+
+    // ★ 2-4(상점)에서 기존 shop-tab-btn을 그대로 사용했으므로, 
+    //    JS로 탭 기능을 구현하는 대신, 기존 onclick="showShopTab(...)"을 그대로 사용합니다.
+    //    따라서 상점 탭 로직은 따로 추가할 필요가 없습니다. (좋은 구조!)
+
+});
+
+
+
+
+/* ------------------------
+   데이터 & 초기값
+   ------------------------ */
+// hp 20 으로 설정
+let player = {
+  level:1, xp:0,
+  baseAtk:5, hp:10000, maxHp:20, mp:20, maxMp:5, def:2, crit:5,
+  coins:0, weapon:1, ownedWeapons: [1], potions:0, mpPotions:0,
+// ★ 신규 장비 슬롯 및 소유 목록 추가
+  equippedTop: null,    // 장착한 상의 ID (null = 없음)
+  equippedBottom: null, // 장착한 하의 ID
+  equippedShield: null, // 장착한 방패 ID
+  ownedTops: [],        // 보유한 상의 ID 목록 [1, 2, ...]
+  ownedBottoms: [],
+  ownedShields: [],
+
+
+  unlockedSkills: [],
+  unlockedTitles: [],
+  equippedTitle: null,
+  allClear:0,
+  missionCountsByCategory: { exercise: 0, study: 0, diet: 0, rest: 0 },
+  weeklyMissionProgress: {},
+  weeklyMissions: [],
+  lastWeeklyReset: null,
+  lastSavedDate: null,
+  dailyRewardClaimed: false,
+  dungeonLevel: 1,
+  claimedWeeklyMissions: [],
+  dailyHistory: {},
+  skillCooldowns: { skill4: 0, skill5: 0 },
+  statPoints: 0,
+  weeklyCounts: { exercise: 0, study: 0, diet: 0, rest: 0 },
+  monsterBook: []
+};
+let dungeonRunStats = null; // 던전 결과 추적용 (던전 입장 시 초기화)
+let playerDiedInDungeon = false; // 플레이어 사망 여부 플래그
+let dungeonBGM = null; // ★ 던전 BGM 오디오 객체 변수 추가
+
+
+/* --- 칭호 데이터 --- */
+const titles = {
+  t1: { id: "t1", name: "[성실한 자]", mission: "일일 미션 완료 누적 50회 달성", target: 50, getProgress: ()=> player.allClear, reward: { hp: 30, mp: 30, atk: 5, def: 5, crit: 2.5 } },
+  t2: { id: "t2", name: "[무한 성장]", mission: "50레벨 달성", target: 50, getProgress: ()=> player.level, reward: { hp: 50, mp: 50 } },
+  t3: { id: "t3", name: "[강철의 육체]", mission: "[운동] 카테고리 완료 누적 200회 달성", category: "exercise", target: 200, getProgress: ()=> player.missionCountsByCategory.exercise, reward: { atk: 15 } },
+  t4: { id: "t4", name: "[자유를 찾아]", mission: "[휴식] 카테고리 완료 누적 200회 달성", category: "rest", target: 200, getProgress: ()=> player.missionCountsByCategory.rest, reward: { hp: 15, mp: 15 } },
+  t5: { id: "t5", name: "[복덩어리]", mission: "[식단] 카테고리 완료 누적 200회 달성", category: "diet", target: 200, getProgress: ()=> player.missionCountsByCategory.diet, reward: { def: 15 } },
+  t6: { id: "t6", name: "[명문대생]", mission: "[공부] 카테고리 완료 누적 200회 달성", category: "study", target: 200, getProgress: ()=> player.missionCountsByCategory.study, reward: { crit: 3 } },
+  t7: { id: "t7", name: "[무기 마스터]", mission: "모든 무기 보유 (7종)", target: 7, getProgress: ()=> player.ownedWeapons.length, reward: { atk: 10 } },
+  t8: { id: "t8", name: "[올라운더]", mission: "모든 카테고리 완료 누적 200회 달성", target: 800, getProgress: ()=> Object.values(player.missionCountsByCategory).reduce((a,b)=>a+b, 0), reward: { hp: 50, mp: 50, atk: 10, def: 10, crit: 5 } }
+};
+function getTitleStatBonus(statKey) {
+  if (!player.equippedTitle || !titles[player.equippedTitle]) return 0;
+  return titles[player.equippedTitle].reward[statKey] || 0;
+}
+
+/* --- 주간 미션 풀 --- */
+const weeklyMissionPools = {
+  exercise: [{ id: "w_ex1", name: "[운동] 카테고리 미션 20회 완료", target: 20, reward: { coins: 1000, atk: 5 } }],
+  study:    [{ id: "w_st1", name: "[공부] 카테고리 미션 20회 완료", target: 20, reward: { coins: 1000, crit: 1 } }],
+  diet:     [{ id: "w_di1", name: "[식단] 카테고리 미션 20회 완료", target: 20, reward: { coins: 1000, def: 3 } }],
+  rest:     [{ id: "w_re1", name: "[휴식] 카테고리 미션 20회 완료", target: 20, reward: { coins: 1000, maxHp: 10, maxMp: 10 } }]
+};
+
+/* --- 기본/커스텀 미션 풀 --- */
+let missionPools = {
+  exercise: { name: "운동", fixed: ["30분 걷기", "푸쉬업 20회"], random: ["스쿼트 20회 (☆)", "15분 러닝 (☆)", "윗몸 일으키기 20회 (☆)"] },
+  study: { name: "공부", fixed: ["배운 내용 1회 정독", "새로운 개념 3가지 정리"], random: ["토익 단어 10개 암기 (☆)", "자격증 공부 10장 (☆)", "공부 중 휴대폰 금지 (☆)"] },
+  diet: { name: "식단", fixed: ["아침 식사 챙기기", "물 1L 섭취"], random: ["균형 있는 식사하기 (☆)", "카페인 섭취 금지 (☆)", "군것질 및 인스턴트 금지 (☆)"] },
+  rest: { name: "휴식", fixed: ["취침 1시간 전 휴대폰 금지", "00시 이전 취침"], random: ["20분 낮잠자기 (☆)", "주기적인 스트레칭하기 (☆)", "취침 전 감사한 일 5가지 적기 (☆)"] }
+};
+function loadCustomMissions() {
+  try {
+    const customMissionsRaw = localStorage.getItem("rl_custom_missions_v2");
+    if (customMissionsRaw) {
+      const customMissions = JSON.parse(customMissionsRaw);
+      for(const cat in customMissions) {
+        if(missionPools[cat]) {
+           if(customMissions[cat].fixed && Array.isArray(customMissions[cat].fixed)) {
+              missionPools[cat].fixed = customMissions[cat].fixed;
+           }
+           if(customMissions[cat].random && Array.isArray(customMissions[cat].random)) {
+              missionPools[cat].random = customMissions[cat].random;
+           }
+        }
+      }
+      log("커스텀 미션 설정을 불러왔습니다.");
+    }
+  } catch(e) { log("커스텀 미션 불러오기 실패: " + e.message); }
+}
+
+/* --- 공통 스킬 데이터 --- */
+const commonSkills = {
+  skill1: { id: "skill1", name: "집중", unlockLevel: 3, cost: 10, img: "images/skill1.png", effectImg: "images/skill1-effect.png", desc: `MP ${10} 소비. 1회에 한해 치명타 확률 100%로 증가.` },
+  skill2: { id: "skill2", name: "응급처치", unlockLevel: 5, cost: 20, img: "images/skill2.png", effectImg: "images/skill2-effect.png", desc: `MP ${20} 소비. 최대 체력의 50%를 즉시 회복.` },
+  skill3: { id: "skill3", name: "물풍선", unlockLevel: 7, cost: 30, img: "images/skill3.png", effectImg: "images/skill3-effect.png", desc: `MP ${30} 소비. 1턴간 몬스터 기절.` },
+skill4: { id: "skill4", name: "독극물", unlockLevel: 9, cost: 50, img: "images/skill4.png", effectImg: "images/skill4-effect.png", desc: `MP ${50} 소비. 2턴간 몬스터를 중독시켜, 공격 시 입힌 피해의 50% 추가 타격. (재사용 2턴)` },
+  skill5: { id: "skill5", name: "각성", unlockLevel: 12, cost: 100, img: "images/skill5.png", effectImg: "images/skill5-effect.png", desc: `MP ${100} 소비. 몬스터 HP 30% 미만일 때, 다음 1회 공격력 100% 증가.` }
+};
+
+/* --- 무기 데이터 --- */
+const shopWeapons = [
+  {id:1, shopImg:"images/weapon1.png", img:"images/weapon_1.png", name:"소형막대기 (Lv.1)", atk:0, cost:0},
+  {id:2, shopImg:"images/weapon2.png", img:"images/weapon_2.png", name:"대형막대기 (Lv.2)", atk:5, cost:2000},
+  {id:3, shopImg:"images/weapon3.png", img:"images/weapon_3.png", name:"마법지팡이 (Lv.3)", atk:15, cost:5000},
+  {id:4, shopImg:"images/weapon4.png", img:"images/weapon_4.png", name:"용사의 검 I (Lv.4)", atk:40, cost:10000},
+  {id:5, shopImg:"images/weapon5.png", img:"images/weapon_5.png", name:"용사의 검 II (Lv.5)", atk:130, cost:30000},
+  {id:6, shopImg:"images/weapon6.png", img:"images/weapon_6.png", name:"용사의 검 III (Lv.6)", atk:300, cost:70000},
+  {id:7, shopImg:"images/weapon7.png", img:"images/weapon_7.png", name:"용사의 검 IV (Lv.7)", atk:700, cost:150000}
+];
+
+/* --- 아이템(물약) 데이터 --- */
+const items = [
+  {id:"potion", img:"images/bottle.png", name:"HP 물약", cost:50, effect:{hp:+10}},
+  {id:"mpPotion", img:"images/bottle2.png", name:"MP 물약", cost:50, effect:{mp:+10}}
+];
+
+/* ★★★ 신규 장비 데이터 추가 ★★★ */
+const shopTops = [
+    // ★ shopImg (언더바 없음) 속성 추가
+    {id:1, shopImg:"images/top1.png", img:"images/top_1.png", name:"평범한 상의", cost:2000, def:5, hp:10},
+    {id:2, shopImg:"images/top2.png", img:"images/top_2.png", name:"가죽 상의", cost:10000, def:30, hp:60},
+    {id:3, shopImg:"images/top3.png", img:"images/top_3.png", name:"단단한 상의", cost:30000, def:100, hp:200},
+     {id:4, shopImg:"images/top4.png", img:"images/top_4.png", name:"슈퍼맨 상의", cost:70000, def:250, hp:500},
+     {id:5, shopImg:"images/top5.png", img:"images/top_5.png", name:"인피니티 상의", cost:150000, def:600, hp:1100}
+];
+const shopBottoms = [
+    // ★ shopImg (언더바 없음) 속성 추가
+    {id:1, shopImg:"images/bottom1.png", img:"images/bottom_1.png", name:"평범한 하의", cost:2000, def:5, mp:10},
+    {id:2, shopImg:"images/bottom2.png", img:"images/bottom_2.png", name:"가죽 하의", cost:10000, def:30, mp:60},
+    {id:3, shopImg:"images/bottom3.png", img:"images/bottom_3.png", name:"단단한 하의", cost:30000, def:100, mp:200},
+     {id:4, shopImg:"images/bottom4.png", img:"images/bottom_4.png", name:"슈퍼맨 하의", cost:70000, def:250, mp:500},
+    {id:5, shopImg:"images/bottom5.png", img:"images/bottom_5.png", name:"인피니티 하의", cost:150000, def:600, mp:1100}
+];
+const shopShields = [
+    // ★ shopImg (언더바 없음) 속성 추가
+    {id:1, shopImg:"images/shield1.png", img:"images/shield_1.png", name:"평범한 방패", cost:7000, def:30},
+    {id:2, shopImg:"images/shield2.png", img:"images/shield_2.png", name:"철 방패", cost:20000, def:100},
+    {id:3, shopImg:"images/shield3.png", img:"images/shield_3.png", name:"강철 방패", cost:50000, def:180}
+];
+
+/* --- DOM 요소 --- */
+const missionGrid = document.getElementById("missionGrid");
+
+const atkText = document.getElementById("atkText");
+const defText = document.getElementById("defText");
+const critText = document.getElementById("critText");
+const levelTag = document.getElementById("levelTag");
+const characterBox = document.getElementById("characterBox");
+
+
+const shopList = document.getElementById("shopList");
+
+const skillList = document.getElementById("skillList");
+
+const titleList = document.getElementById("titleList");
+
+const editMissionTableBody = document.querySelector("#editMissionTable tbody");
+const equipmentModal = document.getElementById("equipmentModal"); 
+const dungeonResultModal = document.getElementById("dungeonResultModal"); 
+
+
+
+
+
+
+
+
+/* 수정: 로그 함수 (콘솔 출력으로 변경) */
+function log(msg){
+  const now = new Date().toLocaleTimeString();
+  console.log(`[${now}] ${msg}`); // ★ HTML 대신 콘솔에 출력
+}
+
+/* ▼▼▼ 보상 팝업 함수 (신규) ▼▼▼ */
+const rewardPopupModal = document.getElementById("rewardPopupModal");
+const rewardPopupContent = document.getElementById("rewardPopupContent");
+let rewardPopupTimeout = null; // 팝업 타이머 ID
+
+function showRewardPopup(rewardTextArray) {
+  // 이전 팝업 타이머가 있으면 취소
+  if (rewardPopupTimeout) {
+    clearTimeout(rewardPopupTimeout);
+  }
+
+  // 내용 설정 (여러 줄 가능하도록 <br> 사용)
+  rewardPopupContent.innerHTML = rewardTextArray.join('<br>');
+  rewardPopupModal.style.display = "flex"; // 팝업 보이기
+
+  // 1초 후에 팝업 숨기기
+  rewardPopupTimeout = setTimeout(() => {
+    rewardPopupModal.style.display = "none";
+    rewardPopupTimeout = null; // 타이머 ID 초기화
+  }, 1000); // 1000ms = 1초
+}
+/* ▲▲▲ 보상 팝업 함수 끝 ▲▲▲ */
+
+
+/* --- 효과음 함수 (신규) --- */
+function playSound(soundFile) {
+  try {
+    const audio = new Audio(`sounds/${soundFile}`);
+    audio.play();
+  } catch (e) {
+    console.error(`Error playing sound ${soundFile}:`, e);
+    // Optionally log to game log: log(`효과음 재생 오류: ${soundFile}`);
+  }
+}
+
+/* --- 미션 관련 함수 --- */
+function generateDailyMissions() {
+  missions = [];
+  for (const categoryKey in missionPools) {
+    const pool = missionPools[categoryKey];
+    pool.fixed.forEach(missionName => {
+      missions.push({ name: missionName, category: categoryKey, done: false, isWeekly: false });
+    });
+    const randomIndex = Math.floor(Math.random() * pool.random.length);
+    missions.push({ name: pool.random[randomIndex], category: categoryKey, done: false, isWeekly: false });
+  }
+}
+
+function generateWeeklyMissions() {
+  player.weeklyMissions = [];
+  player.weeklyMissionProgress = {};
+  for (const categoryKey in weeklyMissionPools) {
+    const pool = weeklyMissionPools[categoryKey];
+    if (pool.length > 0) {
+      const missionData = pool[0];
+      player.weeklyMissions.push({ id: missionData.id, name: missionData.name, target: missionData.target, category: categoryKey });
+      player.weeklyMissionProgress[missionData.id] = 0;
+    }
+  }
+  log("이번 주 주간 미션이 생성되었습니다.");
+}
+
+let weeklyChartInstances = {};
+function renderWeeklyMissions() {
+    const container = document.getElementById("weekly-grid-container");
+    container.innerHTML = "";
+
+    const categories = [
+        { key: 'exercise', name: '운동', color: '#c8a2c8' }, // 보라
+        { key: 'diet', name: '식단', color: '#ffadad' },     // 빨강
+        { key: 'study', name: '공부', color: '#a0c4ff' },    // 파랑
+        { key: 'rest', name: '휴식', color: '#b0d9b1' }      // 초록
+    ];
+
+    categories.forEach(cat => {
+        const current = player.weeklyCounts[cat.key] || 0;
+        const target = 20;
+        const isClaimed = player.claimedWeeklyMissions.includes(cat.key);
+        const isComplete = current >= target;
+
+        // 카드 HTML 생성
+        const card = document.createElement("div");
+        card.className = "weekly-card";
+        
+        let btnText = isClaimed ? "보상 받기 완료" : (isComplete ? "보상 받기" : `${current}/${target}`);
+        let btnClass = isComplete && !isClaimed ? "weekly-reward-btn active" : "weekly-reward-btn";
+        let btnDisabled = isClaimed || !isComplete ? "disabled" : "";
+
+        card.innerHTML = `
+            <h4>${cat.name}</h4>
+            <div class="weekly-chart-wrapper">
+                <canvas id="weeklyChart_${cat.key}"></canvas>
+                <div class="weekly-chart-text">${current}/${target}</div>
+            </div>
+            <button class="${btnClass}" ${btnDisabled} onclick="claimWeeklyReward('${cat.key}')">${btnText}</button>
+        `;
+        container.appendChild(card);
+
+        // 차트 그리기
+        const ctx = document.getElementById(`weeklyChart_${cat.key}`).getContext('2d');
+        
+        // 기존 차트 있으면 파괴 (메모리 누수 방지)
+        if (weeklyChartInstances[cat.key]) {
+            weeklyChartInstances[cat.key].destroy();
+        }
+
+        weeklyChartInstances[cat.key] = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: [Math.min(current, target), Math.max(0, target - current)],
+                    backgroundColor: [cat.color, '#e0e0e0'],
+                    borderWidth: 0
+                }]
+            },
+            options: { 
+                cutout: '75%', 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                animation: false // 깜빡임 방지
+            }
+        });
+    });
+}
+
+function claimWeeklyReward(category) {
+    if (player.claimedWeeklyMissions.includes(category)) return;
+    
+    const current = player.weeklyCounts[category] || 0;
+    if (current < 20) return;
+
+    playSound('missioncomplete2.mp3');
+    player.claimedWeeklyMissions.push(category);
+
+    // ★ 10배 보상 설정
+    let rewards = [`🎉 [주간] ${category} 미션 완료!`, `🪙 코인 +800`, `🌟 XP +100`];
+    player.coins += 800;
+    player.xp += 100;
+
+    // 카테고리별 10배 스탯 보상
+    if (category === 'exercise') {
+        player.baseAtk += 10; rewards.push(`⚔️ 공격력 +10`);
+    } else if (category === 'diet') {
+        player.def += 10; rewards.push(`🛡️ 방어력 +10`);
+    } else if (category === 'study') {
+        player.crit = parseFloat((player.crit + 5).toFixed(1)); rewards.push(`💥 치명타 +5%`);
+    } else if (category === 'rest') {
+        player.maxHp += 20; player.hp += 20;
+        player.maxMp += 20; player.mp += 20;
+        rewards.push(`❤️ 최대 체력 +20`);
+        rewards.push(`💧 최대 MP +20`);
+    }
+
+    showRewardPopup(rewards);
+    checkLevelUp();
+    renderPlayer();
+    saveToLocal();
+    renderWeeklyMissions(); // 버튼 상태 갱신
+}
+
+
+// (기존 'renderMissions' 함수)
+function renderMissions(){
+    missionGrid.innerHTML = "";
+    const currentFilter = document.querySelector('#mission-filter-nav .filter-btn.active').dataset.category;
+
+    missions.forEach((m, idx)=>{
+        // --- 필터링 로직 ---
+        if (currentFilter !== 'ALL' && m.category !== currentFilter) {
+            return; // 카테고리 안맞으면 건너뛰기
+        }
+    
+        const el = document.createElement("div");
+        el.className = "mission" + (m.done ? " done" : "");
+        el.dataset.category = m.category; // ★ 필터링을 위한 데이터 속성 추가
+        
+        const categoryName = missionPools[m.category].name;
+        el.innerHTML = `<div class="status">${m.done?"✓":" "}</div><div>[${categoryName}] ${m.name}</div>`;
+        el.onclick = ()=> completeMission(idx);
+        missionGrid.appendChild(el);
+    });
+
+    // ★ 상단 차트/통계 업데이트 (자동 보상 버튼 대신)
+    renderDailyCharts(); 
+}
+
+
+// ▼▼▼ 스탯 투자 함수 (신규) ▼▼▼
+function investStat(type) {
+    if (player.statPoints <= 0) return; // 포인트 없으면 중단
+
+    player.statPoints--; // 포인트 1 소모
+
+    if (type === 'atk') {
+        player.baseAtk += 1;
+    } else if (type === 'def') {
+        player.def += 1;
+    } else if (type === 'crit') {
+        player.crit = parseFloat((player.crit + 0.1).toFixed(1)); // 부동소수점 오류 방지
+    } else if (type === 'hp') {
+        player.maxHp += 3;
+        player.hp += 3; // 현재 체력도 같이 회복
+    } else if (type === 'mp') {
+        player.maxMp += 1;
+        player.mp += 1; // 현재 MP도 같이 회복
+    }
+
+    playSound('click.mp3'); // 효과음 (클릭음 사용)
+    renderPlayer(); // UI 갱신
+    saveToLocal(); // 저장
+}
+
+
+// ▼▼▼ function renderPlayer() { ... }의 내용물 전체를 이걸로 교체! ▼▼▼
+function renderPlayer(){
+    // --- 1. 스탯 계산 (기존과 동일) ---
+    const w = shopWeapons.find(x=>x.id===player.weapon) || shopWeapons[0];
+    const t = shopTops.find(x=>x.id===player.equippedTop);
+    const b = shopBottoms.find(x=>x.id===player.equippedBottom);
+    const s = shopShields.find(x=>x.id===player.equippedShield);
+
+    const baseAtk = player.baseAtk + (w? w.atk : 0);
+    const baseDef = player.def + (t? t.def : 0) + (b? b.def : 0) + (s? s.def : 0);
+    const baseCrit = player.crit;
+    const baseMaxHp = player.maxHp + (t? t.hp : 0);
+    const baseMaxMp = player.maxMp + (b? b.mp : 0);
+
+    const titleBonusAtk = getTitleStatBonus('atk');
+    const titleBonusDef = getTitleStatBonus('def');
+    const titleBonusCrit = getTitleStatBonus('crit');
+    const titleBonusHp = getTitleStatBonus('hp');
+    const titleBonusMp = getTitleStatBonus('mp');
+
+    const totalAtk = baseAtk + titleBonusAtk;
+    const totalDef = baseDef + titleBonusDef;
+    const totalCrit = baseCrit + titleBonusCrit;
+    const totalMaxHp = baseMaxHp + titleBonusHp;
+    const totalMaxMp = baseMaxMp + titleBonusMp;
+
+    if (player.hp > totalMaxHp) player.hp = totalMaxHp;
+    if (player.mp > totalMaxMp) player.mp = totalMaxMp;
+
+    // --- 2. 새 UI 업데이트 로직 ---
+
+    // 8. 코인 (새 ID)
+    document.getElementById("info-coin-text").textContent = player.coins.toLocaleString();
+
+    // 7. 하단 스탯 (ID 재사용)
+    document.getElementById("hpTextMain").textContent = `${player.hp}/${totalMaxHp}`;
+    document.getElementById("mpTextMain").textContent = `${player.mp}/${totalMaxMp}`;
+    document.getElementById("atkText").textContent = totalAtk;
+    document.getElementById("defText").textContent = totalDef;
+    document.getElementById("critText").textContent = totalCrit.toFixed(1) + "%";
+
+    // 5. 레벨/이름 (ID 재사용)
+    let playerTitle;
+    if (player.level <= 10) { playerTitle = "초보자"; }
+    else if (player.level <= 20) { playerTitle = "정예자"; }
+    else if (player.level <= 30) { playerTitle = "숙련자"; }
+    else { playerTitle = "마스터"; }
+    document.getElementById("levelTag").textContent = `Lv.${player.level} ${playerTitle}`;
+    
+// ▼▼▼ [추가] 칭호 표시 로직 복구 ▼▼▼
+    const equippedTitleDisplay = document.getElementById("equippedTitleDisplay");
+    if (player.equippedTitle && titles[player.equippedTitle]) {
+        equippedTitleDisplay.textContent = titles[player.equippedTitle].name;
+    } else {
+        equippedTitleDisplay.textContent = ""; // 장착 안 했으면 빈카
+    }
+    // ▲▲▲ 여기까지 추가 ▲▲▲
+
+    // 1. 캐릭터 이미지 (ID 재사용)
+    let charImg = 'char_1.png'; // 1-10
+    if (player.level >= 11 && player.level <= 20) charImg = 'char_2.png';
+    else if (player.level >= 21 && player.level <= 30) charImg = 'char_3.png';
+    else if (player.level >= 31) charImg = 'char_4.png';
+    
+    const basePath = `images/${charImg}`;
+    const weaponPath = player.weapon ? `images/weapon_${player.weapon}.png` : 'images/char_0.png';
+    const topPath = player.equippedTop ? `images/top_${player.equippedTop}.png` : 'images/top_0.png';
+    const bottomPath = player.equippedBottom ? `images/bottom_${player.equippedBottom}.png` : 'images/bottom_0.png';
+    const shieldPath = player.equippedShield ? `images/shield_${player.equippedShield}.png` : 'images/shield_0.png';
+
+    document.getElementById('charLayer_Base').src = basePath;
+    document.getElementById('charLayer_Weapon').src = weaponPath;
+    document.getElementById('charLayer_Top').src = topPath;
+    document.getElementById('charLayer_Bottom').src = bottomPath;
+    document.getElementById('charLayer_Shield').src = shieldPath;
+
+    // (장비창 팝업이 열려있을 때 업데이트하는 로직 - 기존과 동일)
+    if (equipmentModal.style.display === "flex") {
+        document.getElementById('equipLayer_Base').src = basePath;
+        document.getElementById('equipLayer_Weapon').src = weaponPath;
+        document.getElementById('equipLayer_Top').src = topPath;
+        document.getElementById('equipLayer_Bottom').src = bottomPath;
+        document.getElementById('equipLayer_Shield').src = shieldPath;
+
+
+        document.getElementById('equipSlot_Top').style.backgroundImage = t ? `url('${t.shopImg}')` : 'none';
+        document.getElementById('equipSlot_Bottom').style.backgroundImage = b ? `url('${b.shopImg}')` : 'none';
+        document.getElementById('equipSlot_Weapon').style.backgroundImage = w ? `url('${w.shopImg}')` : 'none';
+        document.getElementById('equipSlot_Shield').style.backgroundImage = s ? `url('${s.shopImg}')` : 'none';
+
+    }
+
+    // 2. 장비 슬롯 (새 ID)
+    document.getElementById('info-slot-top').style.backgroundImage = t ? `url('${t.shopImg}')` : 'none';
+    document.getElementById('info-slot-bottom').style.backgroundImage = b ? `url('${b.shopImg}')` : 'none';
+    document.getElementById('info-slot-weapon').style.backgroundImage = w ? `url('${w.shopImg}')` : 'none';
+    document.getElementById('info-slot-shield').style.backgroundImage = s ? `url('${s.shopImg}')` : 'none';
+
+    // 3. 물약 슬롯 (새 ID)
+    document.getElementById('info-potion-count').textContent = player.potions || 0;
+    document.getElementById('info-mp-potion-count').textContent = player.mpPotions || 0;
+
+    // 4. 스킬 슬롯 (새 ID)
+    const skillSlotsIds = ['info-skill-1', 'info-skill-2', 'info-skill-3', 'info-skill-4', 'info-skill-5'];
+    const unlocked = player.unlockedSkills.map(id => commonSkills[id]);
+
+    skillSlotsIds.forEach((slotId, index) => {
+        const skill = unlocked[index];
+        const el = document.getElementById(slotId);
+        if (skill) {
+            el.style.backgroundImage = `url('${skill.img}')`;
+            el.title = skill.name;
+        } else {
+            el.style.backgroundImage = 'none';
+            el.title = '(비어있음)';
+        }
+    });
+	
+// ▼▼▼ 스탯 포인트 UI 갱신 (신규) ▼▼▼
+    document.getElementById("spDisplay").textContent = `SP: ${player.statPoints}`;
+    
+    const statButtons = document.querySelectorAll('.stat-up-btn');
+    statButtons.forEach(btn => {
+        // 포인트가 있으면 활성화(disabled=false), 없으면 비활성화(disabled=true)
+        btn.disabled = (player.statPoints <= 0);
+    });
+    // ▲▲▲ 여기까지 추가 ▲▲▲
+}
+
+
+
+
+
+function getNextExp(level) {
+  return 50 + (level - 1) * 50;
+}
+
+function updateExpUI() {
+  const need = getNextExp(player.level);
+  const percent = Math.min(100, Math.floor(player.xp / need * 100));
+  document.getElementById("expText").textContent = `${player.xp}/${need} (${percent}%)`;
+  document.getElementById("expFill").style.width = percent + "%";
+}
+
+function checkLevelUp() {
+  let need = getNextExp(player.level);
+  let leveledUp = false; // 레벨업 여부 플래그
+  while (player.xp >= need) {
+    player.xp -= need;
+    player.level++;
+
+// ▼▼▼ 스탯 포인트 지급 로직 (신규) ▼▼▼
+    let spGain = 0;
+    if (player.level <= 10) spGain = 5;
+    else if (player.level <= 20) spGain = 10;
+    else if (player.level <= 30) spGain = 15;
+    else if (player.level <= 40) spGain = 20;
+    else spGain = 25; // 41레벨 이상
+
+    player.statPoints += spGain;
+    // ▲▲▲ 여기까지 추가 ▲▲▲
+
+	  
+
+    player.hp = player.maxHp;
+    player.mp = player.maxMp;
+    log(`🎉 레벨 업! Lv.${player.level} 달성!`);
+    need = getNextExp(player.level);
+    leveledUp = true; // 레벨업 발생
+  }
+  updateExpUI();
+  renderPlayer();
+  if (leveledUp) { // 레벨업 했을 때만 효과음 재생
+      playSound('levelup.mp3');
+  }
+}
+
+function triggerAllMissionReward() {
+    if (player.dailyRewardClaimed) return; // 이미 받았다면 중복 방지
+
+    playSound('click.mp3'); 
+
+    const rewardCoins = 500;
+    const rewardXp = 30;
+    player.coins += rewardCoins;
+    player.xp += rewardXp;
+    player.allClear++; // ★ 모두 완료 횟수 증가
+    player.dailyRewardClaimed = true;
+
+    log("모든 미션 완료 보상: 코인 +500, XP +30");
+
+    const rewardsToShow = [
+        `✨ 모든 미션 완료! ✨`,
+        `🪙 코인 +${rewardCoins}`,
+        `🌟 XP +${rewardXp}`
+    ];
+    showRewardPopup(rewardsToShow);
+    playSound('missioncomplete2.mp3');
+
+    checkLevelUp();
+    renderPlayer();
+    saveToLocal();
+    
+    // ★ 새 UI 업데이트
+    document.getElementById("all-clear-count").textContent = player.allClear;
+}
+
+
+
+/* 수정: 미션 완료 처리 (보상 팝업 호출) */
+function completeMission(idx){
+    playSound('click.mp3');
+    if(missions[idx].done){ log("이미 완료된 미션입니다."); return; }
+    missions[idx].done = true;
+    const mission = missions[idx];
+
+    // --- 1. 일일 기록 및 주간 미션 업데이트 ---
+    const today = getTodayDate();
+    if (!player.dailyRewardClaimed) { // 12개 다 한 후에는 카운트 중복 방지
+        let currentCount = (player.dailyHistory[today] || 0) + 1;
+        player.dailyHistory[today] = currentCount;
+    }
+    
+    const missionCategory = missions[idx].category;
+    player.missionCountsByCategory[missionCategory]++; // 카테고리 비율용 카운트
+ // ▼▼▼ [추가] 주간 미션 카운트 즉시 증가 ▼▼▼
+    if (player.weeklyCounts === undefined) { 
+        player.weeklyCounts = { exercise: 0, study: 0, diet: 0, rest: 0 }; 
+    }
+    player.weeklyCounts[missionCategory]++;
+    renderWeeklyMissions(); // UI 즉시 새로고침
+    // ▲▲▲ 여기까지 추가 ▲▲▲
+    const weeklyMission = player.weeklyMissions.find(wm => wm.category === missionCategory);
+    if (weeklyMission) {
+        // ... (기존 주간 미션 로직은 그대로 둡니다) ...
+        const missionId = weeklyMission.id;
+        if (!player.claimedWeeklyMissions.includes(missionId) && (player.weeklyMissionProgress[missionId] || 0) < weeklyMission.target) {
+            let currentProgress = (player.weeklyMissionProgress[missionId] || 0) + 1;
+            player.weeklyMissionProgress[missionId] = currentProgress;
+            log(`주간 미션 [${weeklyMission.name}] 진행도 +1 (${currentProgress}/${weeklyMission.target})`);
+
+            if (currentProgress === weeklyMission.target) {
+                log(`🎉 주간 미션 [${weeklyMission.name}] 달성! 클릭해서 보상을 받으세요.`);
+            }
+            renderWeeklyMissions(); // 주간 미션 UI 즉시 업데이트
+        }
+    }
+    
+    // --- 2. 개별 보상 (기존과 동일) ---
+    let hpGain = 2, atkGain = 1, defGain = 1, critGain = 0.5;
+    let xpGain = 10, coinGain = 80;
+    let rewardsToShow = []; 
+
+    switch (mission.category) {
+      case 'exercise': player.baseAtk += atkGain; rewardsToShow.push(`⚔️ 공격력 +${atkGain}`); break;
+      case 'study': player.crit += critGain; rewardsToShow.push(`💥 치명타 +${critGain.toFixed(1)}%`); break;
+      case 'diet': player.def += defGain; rewardsToShow.push(`🛡️ 방어력 +${defGain}`); break;
+      case 'rest': 
+        player.maxHp += hpGain; player.hp += hpGain;
+        player.maxMp += hpGain; player.mp += hpGain;
+        rewardsToShow.push(`❤️ 최대 체력 +${hpGain}`);
+        rewardsToShow.push(`💧 최대 MP +${hpGain}`);
+        break;
+    }
+    player.xp += xpGain;
+    player.coins += coinGain;
+    rewardsToShow.push(`🌟 XP +${xpGain}`);
+    rewardsToShow.push(`🪙 코인 +${coinGain}`);
+
+    showRewardPopup(rewardsToShow);
+    playSound('missioncomplete.mp3');
+
+    // --- 3. 후처리 ---
+    checkLevelUp();
+    renderPlayer();
+    saveToLocal();
+    renderMissions(); // ★ 차트 업데이트가 포함된 함수 호출 (아래 5-4에서 수정)
+    renderCalendar(currentCalendarDate); // ★ 달력 업데이트 (아래 5-5에서 추가)
+
+    // --- 4. 자동 보상 체크 (신규) ---
+    const doneCount = missions.filter(m=>m.done).length;
+    if (doneCount === 12 && !player.dailyRewardClaimed) {
+        // 12개 완료 시, history 카운트를 12로 덮어씀 (달력 아이콘 표시용)
+        player.dailyHistory[today] = 12; 
+        triggerAllMissionReward();
+        saveToLocal(); // 12로 기록된 것 저장
+        renderCalendar(currentCalendarDate); // 달력 즉시 아이콘으로 업데이트
+    }
+}
+
+
+
+
+
+
+
+/* --- 상점 관련 함수 (대규모 수정) --- */
+let currentShopTab = 'weapon'; // 현재 활성화된 탭 추적
+
+
+
+
+
+
+// 탭 버튼 클릭 시 호출되는 함수
+function showShopTab(tabName) {
+    document.getElementById("shopCoinText").textContent = player.coins.toLocaleString();
+    playSound('click.mp3');
+    currentShopTab = tabName;
+    shopList.innerHTML = ""; // 목록 비우기
+
+    // 모든 탭 버튼에서 'active' 클래스 제거
+    document.querySelectorAll('.shop-tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    // 클릭한 탭 버튼에 'active' 클래스 추가
+    document.querySelector(`.shop-tab-btn[onclick="showShopTab('${tabName}')"]`).classList.add('active');
+
+    // 탭에 맞는 데이터 렌더링
+    if (tabName === 'weapon') { renderShopList(shopWeapons, 'weapon'); }
+    else if (tabName === 'top') { renderShopList(shopTops, 'top'); }
+    else if (tabName === 'bottom') { renderShopList(shopBottoms, 'bottom'); }
+    else if (tabName === 'shield') { renderShopList(shopShields, 'shield'); }
+    else if (tabName === 'item') { renderShopList(items, 'item'); }
+}
+
+// 상점 목록을 렌더링하는 공통 함수
+function renderShopList(list, type) {
+    list.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "shop-item";
+        let buttonHtml = '';
+        let itemStats = '';
+
+        if (type === 'item') {
+            let itemCount = 0;
+            // [물약 탭]
+            if (item.id === 'potion') {
+                itemCount = player.potions || 0;    
+                itemStats = `최대 HP의 10% 회복 (보유: ${player.potions || 0})`;
+                } else if (item.id === 'mpPotion') {
+                    itemCount = player.mpPotions || 0;
+                    itemStats = `최대 MP의 10% 회복 (보유: ${player.mpPotions || 0})`;
+                }
+                buttonHtml = `<button class="btn" onclick="buyPotion('${item.id}')">구매</button>`;
+
+                itemHtml = `
+                    <div class="shop-item-icon item-with-count">
+                    <img src="${item.shopImg}" alt="${item.name}"> </div>
+                    <div class="shop-item-info">
+                        <h3>${item.name}</h3>
+                        <p>${itemStats}</p>
+                        <p>가격: ${item.cost.toLocaleString()} 코인</p>
+                    </div>
+                    <div class="shop-item-actions">
+                        ${buttonHtml}
+                    </div>
+                `;                   
+
+
+                
+            } else {
+                // [장비 탭] (무기, 상의, 하의, 방패)
+                const ownedKey = `owned${capitalize(type)}s`; // ex: ownedWeapons, ownedTops
+                const equippedKey = `equipped${type === 'weapon' ? 'Weapon' : capitalize(type)}`; // ex: equippedWeapon, equippedTop
+
+                const isOwned = player[ownedKey].includes(item.id);
+                const isEquipped = player[equippedKey] === item.id;
+                
+                // 스탯 텍스트 자동 생성
+                if(item.atk) itemStats += `공격력 +${item.atk} `;
+                if(item.def) itemStats += `방어력 +${item.def} `;
+                if(item.hp) itemStats += `HP +${item.hp} `;
+                if(item.mp) itemStats += `MP +${item.mp} `;
+                
+                if(isEquipped){ buttonHtml = `<button class="btn" disabled>장착 중</button>`; }
+                else if (isOwned) { buttonHtml = `<button class="btn" onclick="equipItem('${type}', ${item.id})">장착</button>`; }
+                else { buttonHtml = `<button class="btn" onclick="buyEquipment('${type}', ${item.id})">구매</button>`; }
+        }
+
+        // shopImg(무기) 속성이 없으면 img(장비) 속성 사용
+        const imgSrc = item.shopImg || item.img; 
+
+        div.innerHTML = `
+                      <img src="${imgSrc}" alt="${item.name}" style="width: 100px; height: 100px; object-fit: contain; margin-right: 15px; border: 1px solid #eee; border-radius: 4px;" onerror="this.style.opacity=0.4">
+          <div style="flex:1;">
+                <div style="font-weight:700">${item.name}</div>
+                <div style="font-size:13px; margin-top: 5px;">${itemStats.trim()}</div>
+            </div>
+          <div style="text-align:right;width:160px;">
+                <div style="font-weight:700">${item.cost.toLocaleString()} 코인</div>
+                <div style="margin-top:8px;">${buttonHtml}</div>
+            </div>`;
+        shopList.appendChild(div);
+    });
+}
+
+// (Helper) 'weapon' -> 'Weapon', 'top' -> 'Top'
+function capitalize(s) {
+    if (s === 'weapon') return 'Weapon'; // 's' 안붙는 예외 처리
+    return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+// 통합 '장비' 구매 함수 (물약 제외)
+function buyEquipment(type, id) {
+    playSound('click.mp3');
+    
+    // type에 맞는 데이터 리스트 선택
+    const dataList = (type === 'weapon') ? shopWeapons : 
+                     (type === 'top')    ? shopTops : 
+                     (type === 'bottom') ? shopBottoms : shopShields;
+    const item = dataList.find(x => x.id === id);
+    
+    if (!item) return;
+    if (player.coins < item.cost) { log("코인이 부족합니다."); return; }
+    
+    player.coins -= item.cost;
+    
+    const ownedKey = `owned${capitalize(type)}s`; // ex: ownedWeapons
+    // ★ 'weapon'일 때는 'weapon', 그 외에는 'equippedTop' 등으로 설정
+    const equippedKey = (type === 'weapon') ? 'weapon' : `equipped${capitalize(type)}`; // ★ 수정
+
+    player[ownedKey].push(item.id); // 1. 소유 목록에 추가
+    player[equippedKey] = item.id;  // 2. 즉시 장착
+
+    log(`${item.name} 구매/장착 완료!`);
+    renderPlayer(); // ★ 플레이어 상태 갱신 (스탯, 이미지)
+    saveToLocal();
+    showShopTab(currentShopTab); // ★ 상점 목록 갱신 (버튼 상태 변경)
+}
+
+// 통합 '장비' 장착 함수
+function equipItem(type, id) {
+    playSound('click.mp3');
+
+    // ★★★ 아래 3줄 추가 시작 ★★★
+    const dataList = (type === 'weapon') ? shopWeapons : 
+                     (type === 'top')    ? shopTops : 
+                     (type === 'bottom') ? shopBottoms : shopShields;
+    const item = dataList.find(x => x.id === id); // ★ item 변수 선언
+    if (!item) return; // ★ 아이템 못찾으면 중단
+    // ★★★ 3줄 추가 끝 ★★★
+    
+     // ★ 'weapon'일 때는 'weapon', 그 외에는 'equippedTop' 등으로 설정
+    const equippedKey = (type === 'weapon') ? 'weapon' : `equipped${capitalize(type)}`; // ★ 수정
+    player[equippedKey] = id; // 장착
+
+    log(`'${item.name}'(을)를 장착했습니다.`); // ★ 이제 'item'을 알 수 있음
+     showRewardPopup([` ${item.name} 장착 완료!`]);
+    renderPlayer(); // ★ 플레이어 상태 갱신 (스탯, 이미지)
+    saveToLocal();
+    showShopTab(currentShopTab); // ★ 상점 목록 갱신 (버튼 상태 변경)
+}
+
+// '물약' 구매 함수 (기존 buyItem에서 이름 변경)
+function buyPotion(id){
+  playSound('click.mp3')
+  const it = items.find(x=>x.id===id);
+  if(!it) return;
+  if(player.coins < it.cost){ log("코인이 부족합니다."); return; }
+  player.coins -= it.cost;
+
+  if(it.id === "potion"){ player.potions = (player.potions || 0) + 1; log(`HP 물약 구매! 현재 보유 ${player.potions}개`); }
+  else if (it.id === "mpPotion") { player.mpPotions = (player.mpPotions || 0) + 1; log(`MP 물약 구매! 현재 보유 ${player.mpPotions}개`); }
+
+  renderPlayer();
+  saveToLocal();
+  // 물약은 버튼이 안바뀌므로 목록 새로고침(showShopTab) 불필요
+showShopTab(currentShopTab); // ✅ 목록 새로고침 (보유량 갱신)
+}
+
+function renderTitleList() {
+    titleList.innerHTML = ""; // ★ titleList는 DOM 요소 섹션에 이미 선언되어 있습니다.
+    for (const titleId in titles) {
+        const title = titles[titleId];
+        const isUnlocked = player.unlockedTitles.includes(title.id);
+        const progress = title.getProgress();
+        const isComplete = progress >= title.target;
+        const percent = Math.min(100, Math.floor((progress / title.target) * 100));
+        const isEquipped = player.equippedTitle === title.id;
+        let buttonHtml;
+        if (isEquipped) { buttonHtml = `<button class="btn" onclick="unequipTitle('${title.id}')">해제하기</button>`; }
+        else if (isUnlocked) { buttonHtml = `<button class="btn" onclick="equipTitle('${title.id}')">장착하기</button>`; }
+        else if (isComplete) { buttonHtml = `<button class="btn" onclick="claimTitleReward('${title.id}')">보상 받기</button>`; }
+        else { buttonHtml = `<button class="btn" disabled>진행 중</button>`; }
+        let rewardText = Object.entries(title.reward).map(([key, value]) => `${key.toUpperCase()} +${value}`).join(', ');
+        const div = document.createElement("div");
+        div.className = "title-item";
+        div.innerHTML = `
+     <div class="title-item-info">
+       <div class="mission-name">${title.mission} (${progress}/${title.target})</div>
+       <div class="progress-bar-container"><div class="progress-bar-fill" style="width: ${percent}%;"></div></div>
+       <div class="progress-text">달성도: ${percent}%</div>
+     </div>
+     <div class="title-item-reward"><div class="title-name">${title.name}</div><div class="title-stats">${rewardText}</div></div>
+     <div class="title-item-action">${buttonHtml}</div>`;
+        titleList.appendChild(div);
+    }
+    // ★ 참고: 'titleModal.style.display = "flex"' 라인은 필요 없으므로 제외했습니다.
+}
+
+
+function claimTitleReward(titleId) {
+  playSound('click.mp3')
+  if (!titleId || !titles[titleId] || player.unlockedTitles.includes(titleId)) return;
+  const title = titles[titleId];
+  if (title.getProgress() >= title.target) {
+    player.unlockedTitles.push(title.id);
+    log(`🏆 칭호 [${title.name}] 획득 조건을 달성했습니다!`);
+    saveToLocal();
+    renderTitleList();
+  }
+}
+
+function equipTitle(titleId) {
+  playSound('click.mp3')
+  if (!titleId || !titles[titleId] || !player.unlockedTitles.includes(titleId)) return;
+  player.equippedTitle = titleId;
+  log(`✨ 칭호 [${titles[titleId].name}] (을)를 장착했습니다.`);
+  saveToLocal();
+  renderPlayer();
+  renderTitleList();
+}
+
+function unequipTitle(titleId) {
+  playSound('click.mp3')
+  if (player.equippedTitle === titleId) {
+    player.equippedTitle = null;
+    log(`✨ 칭호 [${titles[titleId].name}] (을)를 해제했습니다.`);
+    saveToLocal();
+    renderPlayer();
+    renderTitleList();
+  }
+}
+
+
+// 미션 수정 저장 버튼 연결
+const saveBtn = document.getElementById("saveMissionEditsBtn");
+if(saveBtn) {
+    saveBtn.addEventListener("click", saveMissionEdits);
+}
+let currentCustomMissions = {};
+
+
+
+
+
+function saveMissionEdits() {
+  playSound('click.mp3')
+  const inputs = editMissionTableBody.querySelectorAll("input[type='text']");
+  let updatedMissions = JSON.parse(JSON.stringify(missionPools));
+  inputs.forEach(input => {
+    const category = input.dataset.category; const type = input.dataset.type;
+    const index = parseInt(input.dataset.index); const newValue = input.value.trim();
+    if (newValue !== "") {
+      if (updatedMissions[category]?.[type]?.[index]) {
+        updatedMissions[category][type][index] = newValue;
+      }
+    }
+  });
+  try {
+    localStorage.setItem("rl_custom_missions_v2", JSON.stringify(updatedMissions));
+    log("미션 수정 내용을 저장했습니다. 다음 날부터 적용됩니다.");
+    closeEditMissionWindow();
+  } catch (e) { log("미션 수정 저장 실패: " + e.message); }
+}
+
+
+// ▼▼▼ unlockSkill 함수 위에 이 코드를 추가하세요 ▼▼▼
+
+function renderSkillList() {
+    skillList.innerHTML = ""; // ★ skillList는 DOM 요소 섹션에 이미 선언되어 있습니다.
+    for (const skillId in commonSkills) {
+        const skill = commonSkills[skillId];
+        const isUnlocked = player.unlockedSkills.includes(skill.id);
+        const canUnlock = player.level >= skill.unlockLevel;
+        let buttonHtml;
+        if (isUnlocked) { buttonHtml = `<button class="btn" disabled>해금됨</button>`; }
+        else if (canUnlock) { buttonHtml = `<button class="btn" onclick="unlockSkill('${skill.id}')">해금하기</button>`; }
+        else { buttonHtml = `<button class="btn" disabled>레벨 부족</button>`; }
+        const div = document.createElement("div");
+        div.className = "skill-item";
+        div.innerHTML = `
+     <div><div class="skill-item-img" style="background-image: url('${skill.img}')"></div><div class="skill-item-level">Lv.${skill.unlockLevel}</div></div>
+     <div class="skill-item-desc"><h4>${skill.name}</h4><p>${skill.desc}</p></div>
+     <div class="skill-item-action">${buttonHtml}</div>`;
+        skillList.appendChild(div);
+    }
+    // ★ 참고: 'skillModal.style.display = "flex"' 라인은 필요 없으므로 제외했습니다.
+}
+
+
+
+
+function unlockSkill(skillId) {
+  playSound('skillunlock.mp3')
+  if (!skillId || !commonSkills[skillId] || player.unlockedSkills.includes(skillId)) return;
+  const skill = commonSkills[skillId];
+  if (player.level >= skill.unlockLevel) {
+    player.unlockedSkills.push(skill.id);
+    log(`✨ 공통 스킬 [${skill.name}] (을)를 해금했습니다!`);
+    saveToLocal();
+    renderSkillList();
+    renderPlayer();
+  } else { log("레벨이 부족하여 해금할 수 없습니다."); }
+}
+
+
+
+
+
+
+function openEquipmentWindow() {
+    // 팝업을 켬
+    equipmentModal.style.display = "flex";
+    // 팝업 내부의 이미지들을 현재 장착 상태로 즉시 갱신
+    renderPlayer(); 
+}
+
+function closeEquipmentWindow() {
+    playSound('click.mp3');
+    equipmentModal.style.display = "none";
+}
+
+
+
+
+
+
+
+/* --- 저장/불러오기/관리자 함수 --- */
+
+
+document.getElementById("saveBtn").addEventListener("click", ()=>{
+  playSound('click.mp3'); // ★★★ 클릭 효과음 추가 ★★★
+  saveToLocal();
+  settingsModal.style.display='none';
+});
+document.getElementById("loadBtn").addEventListener("click", ()=>{
+  playSound('click.mp3'); // ★★★ 클릭 효과음 추가 ★★★
+  loadFromLocal(true);
+  settingsModal.style.display='none';
+});
+
+function saveToLocal(){
+  try{
+    player.lastSavedDate = getTodayDate();
+    localStorage.setItem("rl_player_v2", JSON.stringify(player));
+    localStorage.setItem("rl_missions_v2", JSON.stringify(missions));
+    log("저장 완료.");
+  }catch(e){ log("저장 실패: " + e.message); }
+}
+
+function totalReset(){
+  const isConfirmed = confirm("정말로 모든 데이터를 삭제하고 처음 상태로 되돌리시겠습니까?");
+  if(isConfirmed){
+    localStorage.removeItem("rl_player_v2");
+    localStorage.removeItem("rl_missions_v2");
+    localStorage.removeItem("rl_custom_missions_v2"); // 커스텀 미션도 삭제
+    location.reload();
+  }
+}
+
+function resetMissionsForAdmin(){
+  loadCustomMissions();
+  generateDailyMissions();
+  checkWeeklyReset(); // 주간 미션 리셋 (재생성 포함)
+
+  missions.forEach(m => m.done = false); // 일일 미션 완료 상태 초기화
+  player.dailyRewardClaimed = false; // 일일 보상 상태 초기화
+  // player.weeklyMissionProgress = {}; // 주간 미션 진행도는 유지해야 함 (초기화 아님)
+player.coins += 500000;
+  renderPlayer(); // ✅ '내 정보' 탭의 코인 UI를 새로고침
+  renderMissions();
+  renderWeeklyMissions(); // 주간 미션 UI 업데이트
+
+  saveToLocal(); // 초기화된 상태 저장
+}
+
+function loadFromLocal(showLog){
+  try{
+    loadCustomMissions();
+
+    const pRaw = localStorage.getItem("rl_player_v2");
+    const mRaw = localStorage.getItem("rl_missions_v2");
+    if(!pRaw){
+      if(showLog) log("저장된 데이터가 없습니다. 새로운 미션을 생성합니다.");
+      generateDailyMissions();
+      checkWeeklyReset();
+    }
+
+    const p = JSON.parse(pRaw);
+    const m = mRaw ? JSON.parse(mRaw) : null;
+    player = {...player, ...p};
+
+    const today = getTodayDate();
+    checkWeeklyReset();
+
+    if(!player.lastSavedDate || player.lastSavedDate !== today || !m){
+      if(showLog) log("자정이 지났거나 미션 정보가 없습니다. 새로운 미션을 생성합니다.");
+      generateDailyMissions();
+      player.dailyRewardClaimed = false;
+    } else {
+      missions = m;
+    }
+
+    // 방어 코드
+    if(player.baseAtk === undefined) player.baseAtk = 5;
+    if(player.potions === undefined) player.potions = 0; if(player.mpPotions === undefined) player.mpPotions = 0;
+    if(player.ownedWeapons === undefined) player.ownedWeapons = [1];
+    if(player.unlockedSkills === undefined) player.unlockedSkills = [];
+    if(player.unlockedTitles === undefined) player.unlockedTitles = []; if(player.equippedTitle === undefined) player.equippedTitle = null;
+    if(player.missionCountsByCategory === undefined) player.missionCountsByCategory = { exercise: 0, study: 0, diet: 0, rest: 0 };
+    if(player.weeklyMissionProgress === undefined) player.weeklyMissionProgress = {}; if(player.weeklyMissions === undefined) player.weeklyMissions = []; if(player.lastWeeklyReset === undefined) player.lastWeeklyReset = null;
+    if(player.dailyRewardClaimed === undefined) player.dailyRewardClaimed = false;
+    if(player.dungeonLevel === undefined) player.dungeonLevel = 1;
+
+// ★ 신규 장비 슬롯 방어 코드 추가
+    if(player.equippedTop === undefined) player.equippedTop = null;
+    if(player.equippedBottom === undefined) player.equippedBottom = null;
+    if(player.equippedShield === undefined) player.equippedShield = null;
+    if(player.ownedTops === undefined) player.ownedTops = [];
+    if(player.ownedBottoms === undefined) player.ownedBottoms = [];
+    if(player.ownedShields === undefined) player.ownedShields = [];
+    if(player.dailyHistory === undefined) player.dailyHistory = {};
+     monsterDebuffs = { stunned: 0, poison: 0 };
+    if(player.skillCooldowns === undefined) player.skillCooldowns = { skill4: 0, skill5: 0 };
+    if(player.weeklyCounts === undefined) player.weeklyCounts = { exercise: 0, study: 0, diet: 0, rest: 0 };
+    if(player.monsterBook === undefined) player.monsterBook = [];
+    if(player.statPoints === undefined) player.statPoints = 0;
+	renderPlayer(); renderMissions(); renderWeeklyMissions(); 
+    if(showLog) log("불러오기 완료.");
+
+  }catch(e){ log("불러오기 실패: " + e.message); }
+}
+
+// ▼▼ 수정 후 (사용자 로컬 시간 기준)
+function getTodayDate() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0'); // 월 (0-11) + 1
+    const day = String(today.getDate()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}`;
+}
+function getThisMondayDate() {
+  const today = new Date(); const dayOfWeek = today.getDay();
+  const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+  const monday = new Date(today.setDate(diff)); return monday.toISOString().split('T')[0];
+}
+function checkWeeklyReset() {
+  const thisMonday = getThisMondayDate();
+  if (player.lastWeeklyReset !== thisMonday) {
+    log("새로운 주가 시작되어 주간 미션을 초기화합니다.");
+// ▼▼▼ 초기화 로직 수정 ▼▼▼
+    player.weeklyCounts = { exercise: 0, study: 0, diet: 0, rest: 0 }; // 카운트 0으로 리셋
+    player.claimedWeeklyMissions = []; // 받은 보상 기록 리셋
+    // ▲▲▲ 여기까지 수정 ▲▲▲
+    player.lastWeeklyReset = thisMonday;
+    saveToLocal();
+  }
+  renderWeeklyMissions();
+}
+
+/* ------------------------
+   던전 전투 (통합)
+   ------------------------ */
+
+
+let monster = { level:1, hp:20, maxHp:20, atk:3, def: 0, crit: 0, img:"images/mon1.png" };
+let isPlayerTurn = true;
+let playerBuffs = { focus: false };
+let monsterDebuffs = { stunned: 0 };
+let playerTurnState = { usedFocus: false, usedHeal: false, usedStun: false };
+
+function battleMsg(msg){
+  const battleLog = document.getElementById("battleLog");
+  if(battleLog) { battleLog.innerHTML += `<div>${msg}</div>`; battleLog.scrollTop = battleLog.scrollHeight; }
+  else { console.error("Battle log element not found!"); }
+}
+
+function showPlayerEffect(imgUrl, durationMs = 1000, zIndex = 10) {
+  const playerEffect = document.getElementById("playerEffect");
+  if (!playerEffect) return;
+  playerEffect.style.zIndex = zIndex; playerEffect.style.backgroundImage = `url('${imgUrl}')`; playerEffect.style.display = "block";
+  if (durationMs > 0) { setTimeout(() => { playerEffect.style.display = "none"; }, durationMs); }
+}
+function showMonsterEffect(imgUrl, durationMs = 1000, zIndex = 10) {
+  const monsterEffect = document.getElementById("monsterEffect");
+  if (!monsterEffect) return;
+
+  if (imgUrl === '' && durationMs === 0) {
+      // 1. ('', 0)은 이펙트 "강제 종료" 명령으로 사용합니다.
+      monsterEffect.style.display = "none";
+      return;
+  }
+
+  monsterEffect.style.zIndex = zIndex;
+  monsterEffect.style.backgroundImage = `url('${imgUrl}')`;
+  monsterEffect.style.display = "block";
+ 
+  if (durationMs > 0) { 
+    // 2. "무기 이펙트"처럼 시간이 정해진 이펙트의 경우
+    setTimeout(() => {
+        // 3. 타이머 종료 시, 혹시 "지속 이펙트"가 걸려있는지 확인합니다.
+        if (monsterDebuffs.poison > 0) {
+            // 4. 독이 아직 남아있으면, 독 이펙트로 복구합니다.
+            monsterEffect.style.backgroundImage = `url('${commonSkills.skill4.effectImg}')`;
+            monsterEffect.style.display = "block";
+        } else if (monsterDebuffs.stunned > 0) {
+            // 5. 기절이 아직 남아있으면, 기절 이펙트로 복구합니다.
+            monsterEffect.style.backgroundImage = `url('${commonSkills.skill3.effectImg}')`;
+            monsterEffect.style.display = "block";
+        } else {
+            // 6. 아무것도 없으면 이펙트를 끕니다.
+            monsterEffect.style.display = "none";
+        }
+    }, durationMs);
+  }
+  // 7. durationMs가 -1 (독, 기절)이면, 타이머가 없으므로 ('', 0) 호출 전까지 켜져 있습니다.
+}
+
+// 데미지 팝업을 생성하는 새 함수
+function showDamagePopup(target, amount, type = 'normal') {
+    // 1. 올바른 컨테이너 선택
+    const containerId = (target === 'player') ? 'playerDamageContainer' : 'monsterDamageContainer';
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    // 2. 새 <div> 요소 생성
+    const damageEl = document.createElement('div');
+    
+    // 3. 클래스 및 텍스트 설정
+    damageEl.className = `damage-popup ${type}`; // 'damage' 또는 'heal'
+    damageEl.textContent = (type === 'heal') ? `+${amount}` : amount; // 힐은 + 표시
+
+    // 4. 컨테이너에 추가 (화면에 표시)
+    container.appendChild(damageEl);
+
+    // 5. 1초(1000ms) 뒤에 요소 삭제
+    setTimeout(() => {
+        damageEl.remove();
+    }, 500);
+}
+
+
+
+
+function setPlayerButtons(enabled) {
+    const attackBtn = document.getElementById("attackBtn"); 
+    const potionBtn = document.getElementById("potionBtn"); 
+    const mpPotionBtn = document.getElementById("mpPotionBtn");
+    const escapeBtn = document.getElementById("escapeBtn"); 
+    // 5개 버튼 모두 선택
+    const commonSkillBtn1 = document.getElementById("commonSkillBtn1");
+    const commonSkillBtn2 = document.getElementById("commonSkillBtn2");
+    const commonSkillBtn3 = document.getElementById("commonSkillBtn3");
+    const commonSkillBtn4 = document.getElementById("commonSkillBtn4"); // ★ 추가
+    const commonSkillBtn5 = document.getElementById("commonSkillBtn5"); // ★ 추가
+
+    isPlayerTurn = enabled;
+    if (attackBtn) attackBtn.disabled = !enabled; if (potionBtn) potionBtn.disabled = !enabled; if (mpPotionBtn) mpPotionBtn.disabled = !enabled;
+    if (escapeBtn) escapeBtn.disabled = !enabled; 
+    
+    if (commonSkillBtn1) commonSkillBtn1.disabled = !enabled;
+    if (commonSkillBtn2) commonSkillBtn2.disabled = !enabled;
+    if (commonSkillBtn3) commonSkillBtn3.disabled = !enabled;
+// ▼▼▼ 4, 5번 버튼 비활성화 로직 수정 ▼▼▼
+    if (commonSkillBtn4) commonSkillBtn4.disabled = !enabled || player.skillCooldowns.skill4 > 0; // ✅ 쿨다운 중이면 비활성화
+    if (commonSkillBtn5) commonSkillBtn5.disabled = !enabled; // ✅ (각성 스킬은 조건부이므로 턴 비활성화만)
+}
+
+
+function startPlayerTurn() {
+  // ▼▼▼ 쿨다운 1턴 감소 ▼▼▼
+  if (player.skillCooldowns.skill4 > 0) {
+      player.skillCooldowns.skill4--;
+  }
+  setPlayerButtons(true);
+  playerTurnState = { usedFocus: false, usedHeal: false, usedStun: false };
+  const monsterEffect = document.getElementById("monsterEffect"); const playerEffect = document.getElementById("playerEffect");
+  const commonSkillBtn1 = document.getElementById("commonSkillBtn1"); 
+  const commonSkillBtn2 = document.getElementById("commonSkillBtn2"); 
+  const commonSkillBtn3 = document.getElementById("commonSkillBtn3");
+  const commonSkillBtn4 = document.getElementById("commonSkillBtn4"); // ✅ 4번 버튼
+  const commonSkillBtn5 = document.getElementById("commonSkillBtn5");
+
+// ▼▼▼ 몬스터/플레이어 효과 갱신 ▼▼▼
+  if (monsterDebuffs.stunned <= 0 && monsterDebuffs.poison <= 0 && monsterEffect) { // ✅ poison 체크
+      monsterEffect.style.display = "none";
+  }
+  if (!playerBuffs.focus && !playerBuffs.awakened && playerEffect) { // ✅ awakened 체크
+      playerEffect.style.display = "none";
+  }
+  
+  if (commonSkillBtn1) commonSkillBtn1.classList.remove('on-cooldown');
+  if (commonSkillBtn2) commonSkillBtn2.classList.remove('on-cooldown');
+  if (commonSkillBtn3) commonSkillBtn3.classList.remove('on-cooldown');
+  if (commonSkillBtn4) {
+      if (player.skillCooldowns.skill4 > 0) {
+          commonSkillBtn4.classList.add('on-cooldown');
+          commonSkillBtn4.textContent = player.skillCooldowns.skill4; // 쿨다운 턴 수 표시
+      } else {
+          commonSkillBtn4.classList.remove('on-cooldown');
+          commonSkillBtn4.textContent = '';
+      }
+  }
+  if (commonSkillBtn5) commonSkillBtn5.classList.remove('on-cooldown'); // (skill5는 조건부 스킬)
+}
+
+
+/* 수정: 던전 입장 (BGM 오류 처리 강화) */
+function startBattle(){
+ try {
+  // (기존 DOM 요소들)
+  const playerImg = document.getElementById("playerImg"); const playerEffect = document.getElementById("playerEffect");
+  const monImg = document.getElementById("monImg"); const monsterEffect = document.getElementById("monsterEffect");
+  const pHpFill = document.getElementById("pHpFill"); const pMpFill = document.getElementById("pMpFill"); const mHpFill = document.getElementById("mHpFill");
+  const pHpText = document.getElementById("pHpText"); const pMpText = document.getElementById("pMpText"); const mHpText = document.getElementById("mHpText");
+  const pLvText = document.getElementById("pLv"); const mLvText = document.getElementById("mLv");
+  const attackBtn = document.getElementById("attackBtn"); const potionBtn = document.getElementById("potionBtn"); const mpPotionBtn = document.getElementById("mpPotionBtn");
+  const escapeBtn = document.getElementById("escapeBtn"); 
+  const commonSkillBtn1 = document.getElementById("commonSkillBtn1");
+  const commonSkillBtn2 = document.getElementById("commonSkillBtn2");
+  const commonSkillBtn3 = document.getElementById("commonSkillBtn3");
+  const commonSkillBtn4 = document.getElementById("commonSkillBtn4"); // ✅ 4번 버튼
+  const commonSkillBtn5 = document.getElementById("commonSkillBtn5"); // ✅ 5번 버튼
+  const battleLog = document.getElementById("battleLog");
+
+  // ★ [새 구조] 프로필 사진 DOM 요소 추가
+  const playerImgProfile = document.getElementById("playerImg_profile");
+  const monImgProfile = document.getElementById("monImg_profile");
+
+  const attackHandler = () => handleAttack(); const hpPotionHandler = () => handleHpPotion(); const mpPotionHandler = () => handleMpPotion();
+  const skill1Handler = () => handleSkill1(); const skill2Handler = () => handleSkill2(); const skill3Handler = () => handleSkill3(); 
+  const skill4Handler = () => handleSkill4(); // ✅ 4번 핸들러
+  const skill5Handler = () => handleSkill5(); // ✅ 5번 핸들러 
+  const escapeHandler = () => handleEscape();
+
+  // (기존 리스너 제거 로직 - Btn4, 5는 리스너가 없으므로 놔둠)
+  if (attackBtn._clickHandler) attackBtn.removeEventListener("click", attackBtn._clickHandler); if (potionBtn._clickHandler) potionBtn.removeEventListener("click", potionBtn._clickHandler);
+  if (mpPotionBtn._clickHandler) mpPotionBtn.removeEventListener("click", mpPotionBtn._clickHandler); if (commonSkillBtn1._clickHandler) commonSkillBtn1.removeEventListener("click", commonSkillBtn1._clickHandler);
+  if (commonSkillBtn2._clickHandler) commonSkillBtn2.removeEventListener("click", commonSkillBtn2._clickHandler); if (commonSkillBtn3._clickHandler) commonSkillBtn3.removeEventListener("click", commonSkillBtn3._clickHandler);
+  if (commonSkillBtn4._clickHandler) commonSkillBtn4.removeEventListener("click", commonSkillBtn4._clickHandler); // ✅ 4번 리스너 제거
+  if (commonSkillBtn5._clickHandler) commonSkillBtn5.removeEventListener("click", commonSkillBtn5._clickHandler); // ✅ 5번 리스너 제거
+  if (escapeBtn._clickHandler) escapeBtn.removeEventListener("click", escapeBtn._clickHandler);
+
+  // (기존 리스너 연결 로직 - Btn4, 5는 놔둠)
+  if(attackBtn) { attackBtn.addEventListener("click", attackHandler); attackBtn._clickHandler = attackHandler; }
+  if(potionBtn) { potionBtn.addEventListener("click", hpPotionHandler); potionBtn._clickHandler = hpPotionHandler; }
+  if(mpPotionBtn) { mpPotionBtn.addEventListener("click", mpPotionHandler); mpPotionBtn._clickHandler = mpPotionHandler; }
+  if(commonSkillBtn1) { commonSkillBtn1.addEventListener("click", skill1Handler); commonSkillBtn1._clickHandler = skill1Handler; }
+  if(commonSkillBtn2) { commonSkillBtn2.addEventListener("click", skill2Handler); commonSkillBtn2._clickHandler = skill2Handler; }
+  if(commonSkillBtn3) { commonSkillBtn3.addEventListener("click", skill3Handler); commonSkillBtn3._clickHandler = skill3Handler; }
+  if(commonSkillBtn4) { commonSkillBtn4.addEventListener("click", skill4Handler); commonSkillBtn4._clickHandler = skill4Handler; } // ✅ 4번 리스너 연결
+  if(commonSkillBtn5) { commonSkillBtn5.addEventListener("click", skill5Handler); commonSkillBtn5._clickHandler = skill5Handler; } // ✅ 5번 리스너 연결
+  if(escapeBtn) { escapeBtn.addEventListener("click", escapeHandler); escapeBtn._clickHandler = escapeHandler; }
+
+  // (던전 레벨 및 배경 설정)
+  if(typeof player.dungeonLevel !== 'number' || player.dungeonLevel < 1) player.dungeonLevel = 1; if(player.dungeonLevel > 25) player.dungeonLevel = 25;
+  const level = player.dungeonLevel;
+  let bgImage = 'images/dungeonbackground1.png';
+  if (level >= 7 && level <= 12) bgImage = 'images/dungeonbackground2.png';
+  else if (level >= 13 && level <= 18) bgImage = 'images/dungeonbackground3.png';
+  else if (level >= 19 && level <= 24) bgImage = 'images/dungeonbackground4.png';
+  else if (level >= 25) bgImage = 'images/dungeonbackground5.png';
+  document.getElementById('window-dungeon').style.backgroundImage = `url('${bgImage}')`;
+
+  // (몬스터 스탯 설정 - 기존과 동일)
+  monster.level = level;
+  let hp, atk, def, crit;
+  if (level <= 10) { hp = 20 + (level * 15); atk = 3 + (level * 2); def = 0 + level; crit = 0; }
+  else if (level <= 24) { const p = 1.4, pl = level - 10; hp = Math.floor((170)*Math.pow(p, pl)); atk = Math.floor((23)*Math.pow(p, pl)); def = Math.floor((10)*Math.pow(p, pl)); crit = 10 + (pl * 5); }
+  else { const p = 1.4, pl24 = 14; const bHp=Math.floor((170)*Math.pow(p, pl24)); const bAtk=Math.floor((23)*Math.pow(p, pl24)); const bDef=Math.floor((10)*Math.pow(p, pl24)); const bCrit=10 + (pl24 * 5); hp=Math.floor(bHp*2.2); atk=Math.floor(bAtk*2.0); def=Math.floor(bDef*1.5); crit=bCrit+15; battleMsg("!! 최종 보스 !!"); }
+  if (level === 7 || level === 13 || level === 19) { const sm = 1.5; hp=Math.floor(hp*sm); atk=Math.floor(atk*sm); def=Math.floor(def*sm); battleMsg("!! 강력 !!"); }
+  monster.maxHp = hp; monster.hp = hp; monster.atk = atk; monster.def = def; monster.crit = crit; monster.img = `images/mon${level}.png`;
+  // ✅ 버프/디버프/쿨다운 초기화
+  playerBuffs = { focus: false, awakened: false }; // ✅ 'awakened' 추가
+  monsterDebuffs = { stunned: 0, poison: 0 }; // ✅ 'poison' 추가
+  player.skillCooldowns = { skill4: 0, skill5: 0 }; // ✅ 쿨다운 초기화
+  startPlayerTurn();
+
+  // ★ 몬스터 이미지 (큰 것 + 프로필) 설정
+  if (monImg) monImg.style.backgroundImage = `url('${monster.img}')`;
+  if (monImgProfile) monImgProfile.style.backgroundImage = `url('${monster.img}')`; // ★ 추가
+  
+  if (pLvText) pLvText.textContent = player.level; if (mLvText) mLvText.textContent = level;
+
+
+
+
+  // ★ 플레이어 이미지 (큰 것 + 프로필) 설정
+  let charImg = 'char_1.png'; // 1-10 레벨 기본
+  if (player.level >= 11 && player.level <= 20) charImg = 'char_2.png';
+  else if (player.level >= 21 && player.level <= 30) charImg = 'char_3.png';
+  else if (player.level >= 31) charImg = 'char_4.png';
+
+  const basePath = `images/${charImg}`;
+  if (playerImgProfile) playerImgProfile.style.backgroundImage = `url('${basePath}')`; // ★ 추가
+
+  // (기존 5-Layer 로직)
+  const weaponPath = player.weapon ? `images/weapon_${player.weapon}.png` : 'images/char_0.png';
+  const topPath = player.equippedTop ? `images/top_${player.equippedTop}.png` : 'images/top_0.png';
+  const bottomPath = player.equippedBottom ? `images/bottom_${player.equippedBottom}.png` : 'images/bottom_0.png';
+  const shieldPath = player.equippedShield ? `images/shield_${player.equippedShield}.png` : 'images/shield_0.png';
+  
+  document.getElementById('dungeonLayer_Base').src = basePath;
+  document.getElementById('dungeonLayer_Weapon').src = weaponPath;
+  document.getElementById('dungeonLayer_Top').src = topPath;
+  document.getElementById('dungeonLayer_Bottom').src = bottomPath;
+  document.getElementById('dungeonLayer_Shield').src = shieldPath;
+
+  // (UI 갱신 및 버튼 스타일 설정)
+  updateBattleUI(); if(battleLog) battleLog.innerHTML = ""; battleMsg("전투 개시!");
+  const w = shopWeapons.find(x=>x.id===player.weapon);
+  if (attackBtn) { attackBtn.style.backgroundImage = w?`url('${w.shopImg}')`:''; attackBtn.textContent=''; }
+  if (potionBtn) { potionBtn.style.backgroundImage = `url('images/bottle.png')`; potionBtn.textContent = `HP(${player.potions||0})`; }
+  if (mpPotionBtn) { mpPotionBtn.style.backgroundImage = `url('images/bottle2.png')`; mpPotionBtn.textContent = `MP(${player.mpPotions||0})`;}
+  
+  // ★ escapeBtn 스타일링 코드는 삭제 (CSS가 처리)
+  // if (escapeBtn) { escapeBtn.style.backgroundImage = `url('images/exit.png')`; escapeBtn.textContent = '';}
+  
+  if (commonSkillBtn1) commonSkillBtn1.style.backgroundImage = player.unlockedSkills.includes('skill1')?`url('${commonSkills.skill1.img}')`:'none';
+  if (commonSkillBtn2) commonSkillBtn2.style.backgroundImage = player.unlockedSkills.includes('skill2')?`url('${commonSkills.skill2.img}')`:'none';
+  if (commonSkillBtn3) commonSkillBtn3.style.backgroundImage = player.unlockedSkills.includes('skill3')?`url('${commonSkills.skill3.img}')`:'none';
+  if (commonSkillBtn4) commonSkillBtn4.style.backgroundImage = player.unlockedSkills.includes('skill4')?`url('${commonSkills.skill4.img}')`:'none';
+  if (commonSkillBtn5) commonSkillBtn5.style.backgroundImage = player.unlockedSkills.includes('skill5')?`url('${commonSkills.skill5.img}')`:'none';
+ 
+  } catch(error) { console.error("Error startBattle:", error); battleMsg("전투 시작 오류"); }
+}
+
+
+
+
+
+function updateBattleUI(){
+    // (기존 DOM 요소 ID 재사용)
+    const pHpT=document.getElementById("pHpText"), mHpT=document.getElementById("mHpText"), 
+          pHpF=document.getElementById("pHpFill"), mHpF=document.getElementById("mHpFill"), 
+          pMpT=document.getElementById("pMpText"), pMpF=document.getElementById("pMpFill");
+          
+    const t = shopTops.find(x=>x.id===player.equippedTop);
+    const b = shopBottoms.find(x=>x.id===player.equippedBottom);
+    const tMaxHp = player.maxHp + (t? t.hp : 0) + getTitleStatBonus('hp');
+    const tMaxMp = player.maxMp + (b? b.mp : 0) + getTitleStatBonus('mp');    
+    // ★ 스케치에 맞게 텍스트 포맷 변경 (예: "HP 58/176")
+    if(pHpT) pHpT.textContent = `HP ${player.hp}/${tMaxHp}`; 
+    if(mHpT) mHpT.textContent = `HP ${monster.hp}/${monster.maxHp}`;
+    if(pMpT) pMpT.textContent = `MP ${player.mp}/${tMaxMp}`;
+
+    // (게이지 바 업데이트는 ID가 동일하므로 그대로 작동)
+    if(pHpF) pHpF.style.width = Math.max(0,(player.hp/tMaxHp*100))+"%"; 
+    if(mHpF) mHpF.style.width = Math.max(0,(monster.hp/monster.maxHp*100))+"%";
+    if(pMpF) pMpF.style.width = Math.max(0,(player.mp/tMaxMp*100))+"%";
+}
+
+
+
+
+let battleTimeout = null; // ★ 타임아웃 관리 변수 추가 (전역 또는 상단에 선언 권장하지만, 여기서는 함수 밖 전역변수로 가정)
+
+function handleAttack() {
+    if (!isPlayerTurn || player.hp <= 0 || monster.hp <= 0) return;
+    
+    // 기존 예약된 타임아웃이 있다면 취소 (중복 방지)
+    if (battleTimeout) clearTimeout(battleTimeout);
+
+    setPlayerButtons(false); // 턴 종료
+
+    const pEff = document.getElementById("playerEffect"), mImg = document.getElementById("monImg");
+    let isCrit = Math.random() * 100 < player.crit, critMsg = "";
+    if (playerBuffs.focus) { isCrit = true; critMsg = "[집중] "; playerBuffs.focus = false; if (pEff) pEff.style.display = "none"; }
+
+    const w = shopWeapons.find(x => x.id === player.weapon) || { atk: 0 }, tAtk = getTitleStatBonus('atk'), totalAtk = player.baseAtk + (w ? w.atk : 0) + tAtk;
+    const rawDmg = Math.floor(totalAtk + (isCrit ? Math.floor(totalAtk * 0.25) : 0));
+
+    // --- (A) 몬스터 반격 로직 ---
+    const monsterCounterAttack = () => {
+        const pImg = document.getElementById("playerImg");
+        
+        // 기절 체크
+        if (monsterDebuffs.stunned > 0) { 
+            monsterDebuffs.stunned--; 
+            battleMsg("몬스터 기절!"); 
+            showMonsterEffect('', 0); // 기절 이펙트 제거
+            startPlayerTurn(); 
+            return; 
+        }
+        
+        // 몬스터 공격
+        const isMCrit = Math.random() * 100 < monster.crit, mRawDmg = monster.atk + (isMCrit ? Math.floor(monster.atk * 0.5) : 0);
+        const tDef = player.def + getTitleStatBonus('def'), mDmg = Math.max(1, mRawDmg - tDef);
+        player.hp = Math.max(0, player.hp - mDmg); 
+        battleMsg(`몬스터 반격! ${isMCrit ? "치명타! " : ""}플레이어 ${mDmg} 피해.`);
+        showDamagePopup('player', mDmg, isMCrit ? 'critical' : 'normal');
+        playSound('punch.mp3');
+
+        if (pImg) { const pSC = isMCrit ? "shake-crit" : "shake-normal"; pImg.classList.add(pSC); setTimeout(() => pImg.classList.remove(pSC), 500); }
+        
+        updateBattleUI();
+
+        // ★ 독 턴 감소 (몬스터 턴 종료 시 1회만)
+        if (monsterDebuffs.poison > 0) {
+            monsterDebuffs.poison--; 
+            battleMsg(`[독극물] 효과가 ${monsterDebuffs.poison}턴 남았습니다.`);
+            if (monsterDebuffs.poison <= 0) { 
+                showMonsterEffect('', 0); // 독 종료 시 이펙트 제거
+            }
+        }
+        
+        if (player.hp <= 0) { playSound('monsterlose.mp3'); gameOver(); } else { startPlayerTurn(); }
+    };
+    
+    // --- (B) 1. 기본 공격 (즉시) ---
+    let finalDmg = Math.max(1, rawDmg - monster.def);
+    if (playerBuffs.awakened) {
+        finalDmg *= 2; 
+        critMsg += "[각성] ";
+        playerBuffs.awakened = false;
+        if(pEff) pEff.style.display = "none"; 
+    }
+
+    monster.hp = Math.max(0, monster.hp - finalDmg);
+    battleMsg(`플레이어 ${critMsg}공격! ${isCrit ? "치명타! " : ""}몬스터 ${finalDmg} 피해.`);
+    showDamagePopup('monster', finalDmg, isCrit ? 'critical' : 'normal'); 
+    playSound(`weapon${player.weapon}.mp3`);
+    showMonsterEffect(`images/weapon${player.weapon}-effect.png`, 500, 10);
+
+    if (mImg) { const sC = isCrit ? "shake-crit" : "shake-normal"; mImg.classList.add(sC); setTimeout(() => mImg.classList.remove(sC), 1000); }
+    updateBattleUI(); 
+
+    if (monster.hp <= 0) { monster.hp = 0; playSound('monsterwin.mp3'); winBattle(); return; }
+
+    // --- (C) 2. 독극물 추가 타격 (0.6초 후) ---
+    if (monsterDebuffs.poison > 0) {
+        battleTimeout = setTimeout(() => { 
+            const poisonDmg = Math.floor(finalDmg * 0.5);
+
+            if (poisonDmg > 0) {
+                monster.hp = Math.max(0, monster.hp - poisonDmg);
+                battleMsg(`[독극물] 추가 타격! -${poisonDmg} HP`);
+                showDamagePopup('monster', poisonDmg, 'normal'); 
+                playSound('punch_poison.mp3'); // 효과음 (파일 확인 필요)
+                showMonsterEffect(`images/weapon${player.weapon}-effect.png`, 500, 10); 
+            }
+            updateBattleUI(); 
+
+            if (monster.hp <= 0) { 
+                monster.hp = 0; 
+                playSound('monsterwin.mp3'); 
+                winBattle(); 
+                return;
+            }
+
+            // 독 타격 후 0.6초 뒤 몬스터 반격
+            battleTimeout = setTimeout(monsterCounterAttack, 600); 
+
+        }, 600); 
+    } else {
+        // 독 없으면 1초 뒤 몬스터 반격
+        battleTimeout = setTimeout(monsterCounterAttack, 1000); 
+    }
+}
+
+function handleHpPotion() {
+  if(!isPlayerTurn) return; if((player.potions||0)<=0){battleMsg("HP 물약 없음"); return;} 
+
+  const t = shopTops.find(x=>x.id===player.equippedTop);
+  const tMaxHp = player.maxHp + (t? t.hp : 0) + getTitleStatBonus('hp');
+
+
+// ▼▼▼ 이 아랫줄을 수정합니다. ▼▼▼
+  const healAmount = Math.floor(tMaxHp * 0.1); // ✅ 10% 회복량 계산
+  if(player.hp>=tMaxHp){battleMsg("HP 가득"); return;} player.potions--; player.hp=Math.min(tMaxHp, player.hp + healAmount); // ✅ +10 대신 healAmount 사용
+  battleMsg(`HP 물약 사용! +${healAmount} HP`); playSound('drink.mp3'); // ✅ 메시지에도 healAmount 적용
+  // ▲▲▲ 여기까지 수정 ▲▲▲
+  const pBtn=document.getElementById("potionBtn"); if(pBtn)pBtn.textContent=`HP(${player.potions})`; updateBattleUI(); saveToLocal();
+}
+
+function handleMpPotion() {
+  if(!isPlayerTurn) return; if((player.mpPotions||0)<=0){battleMsg("MP 물약 없음"); return;} 
+
+  const b = shopBottoms.find(x=>x.id===player.equippedBottom);
+  const tMaxMp = player.maxMp + (b? b.mp : 0) + getTitleStatBonus('mp');
+// ▼▼▼ 이 아랫줄을 수정합니다. ▼▼▼
+  const healAmount = Math.floor(tMaxMp * 0.1); // ✅ 10% 회복량 계산
+  if(player.mp>=tMaxMp){battleMsg("MP 가득"); return;} player.mpPotions--; player.mp=Math.min(tMaxMp, player.mp + healAmount); // ✅ +10 대신 healAmount 사용
+  battleMsg(`MP 물약 사용! +${healAmount} MP`); playSound('drink.mp3'); // ✅ 메시지에도 healAmount 적용
+  // ▲▲▲ 여기까지 수정 ▲▲▲
+  const mpBtn=document.getElementById("mpPotionBtn"); if(mpBtn)mpBtn.textContent=`MP(${player.mpPotions})`; updateBattleUI(); saveToLocal();
+}
+
+function handleSkill1() {
+  if(!isPlayerTurn||!player.unlockedSkills.includes('skill1'))return; const skill=commonSkills.skill1, btn=document.getElementById("commonSkillBtn1");
+  if(playerTurnState.usedFocus){battleMsg("집중 턴당 1회"); return;} if(player.mp<skill.cost){battleMsg("MP 부족"); return;}
+  player.mp-=skill.cost; playerBuffs.focus=true; playerTurnState.usedFocus=true; if(btn)btn.classList.add('on-cooldown');
+  showPlayerEffect(skill.effectImg, -1, 10); battleMsg("✨ [집중] 시전!"); playSound('skill1.mp3'); updateBattleUI(); // ★ 스킬 효과음
+}
+
+function handleSkill2() {
+  if(!isPlayerTurn||!player.unlockedSkills.includes('skill2'))return; const skill=commonSkills.skill2, btn=document.getElementById("commonSkillBtn2");
+  if(playerTurnState.usedHeal){battleMsg("응급처치 턴당 1회"); return;} if(player.mp<skill.cost){battleMsg("MP 부족"); return;}
+
+
+  const t = shopTops.find(x=>x.id===player.equippedTop);
+  const tMaxHp = player.maxHp + (t? t.hp : 0) + getTitleStatBonus('hp'); // ✅ (1) 올바른 tMaxHp 선언
+
+  // ▼▼▼ 이 줄을 아래와 같이 수정하세요 ▼▼▼
+  if(player.hp<=0){battleMsg("전투 불능"); return;} if(player.hp>=tMaxHp){battleMsg("HP 가득"); return;} // ✅ (2) 중복 선언(const tMaxHp=...) 삭제
+  player.mp-=skill.cost; const heal=Math.floor(tMaxHp*0.5); player.hp=Math.min(tMaxHp, player.hp+heal); playerTurnState.usedHeal=true; if(btn)btn.classList.add('on-cooldown');
+  showPlayerEffect(skill.effectImg, 2000, 10); battleMsg(`❤️ [응급처치]! +${heal} HP`); playSound('skill2.mp3'); updateBattleUI(); // ★ 스킬 효과음
+}
+
+function handleSkill3() {
+  if(!isPlayerTurn||!player.unlockedSkills.includes('skill3'))return; const skill=commonSkills.skill3, btn=document.getElementById("commonSkillBtn3");
+  if(playerTurnState.usedStun){battleMsg("물풍선 턴당 1회"); return;} if(player.mp<skill.cost){battleMsg("MP 부족"); return;}
+  player.mp-=skill.cost; monsterDebuffs.stunned=1; playerTurnState.usedStun=true; if(btn)btn.classList.add('on-cooldown');
+  showMonsterEffect(skill.effectImg, -1, 10); battleMsg("💧 [물풍선] 발사!"); playSound('skill3.mp3'); updateBattleUI(); // ★ 스킬 효과음
+}
+
+// ▼▼▼ 여기에 새 함수 2개 추가 ▼▼▼
+
+function handleSkill4() { // [독극물]
+  if(!isPlayerTurn||!player.unlockedSkills.includes('skill4'))return; 
+  const skill=commonSkills.skill4, btn=document.getElementById("commonSkillBtn4");
+  
+  if(player.skillCooldowns.skill4 > 0) { battleMsg("아직 재사용할 수 없습니다."); return; }
+  if(player.mp<skill.cost){battleMsg("MP 부족"); return;}
+
+  player.mp-=skill.cost;
+  monsterDebuffs.poison = 2; // 2턴간 지속
+  player.skillCooldowns.skill4 = 2; // 2턴 + 현재턴 = 3턴간 사용 불가
+  
+  if(btn) btn.classList.add('on-cooldown'); // 즉시 쿨다운 UI 적용
+  showMonsterEffect(skill.effectImg, -1, 10); // 몬스터에게 독 이펙트
+  battleMsg("☠️ [독극물] 시전! 몬스터가 중독됩니다."); 
+  playSound('skill4.mp3'); // (임시 효과음, skill4.mp3로 변경 권장)
+  updateBattleUI();
+}
+
+function handleSkill5() { // [각성]
+  if(!isPlayerTurn||!player.unlockedSkills.includes('skill5'))return; 
+  const skill=commonSkills.skill5, btn=document.getElementById("commonSkillBtn5");
+
+  // ▼▼▼ 수정된 조건문 ▼▼▼
+  // 몬스터 HP가 30% 이상이면 사용 불가
+  if (monster.hp >= monster.maxHp * 0.9) {
+      battleMsg("[각성]은 몬스터 HP가 30% 미만일 때만 사용 가능합니다.");
+      return; // 턴 소모 없음
+  }
+  // ▲▲▲ 수정 완료 ▲▲▲
+
+  if(player.mp<skill.cost){battleMsg("MP 부족"); return;} // 턴 소모 없음
+
+  player.mp-=skill.cost;
+  playerBuffs.awakened = true; // 각성 버프 활성화
+  
+  showPlayerEffect(skill.effectImg, -1, 0); // 플레이어에게 각성 이펙트 (뒤쪽)
+  battleMsg("🔥 [각성] 시전! 다음 공격이 증폭됩니다!"); 
+  playSound('skill5.mp3'); 
+  updateBattleUI();
+}
+
+
+
+
+/* 수정: 도망가기 (결과 팝업 호출) */
+function handleEscape() {
+  if(!isPlayerTurn) return;
+  playSound('click.mp3');
+  battleMsg("도망!");
+
+  if (dungeonBGM) { dungeonBGM.pause(); dungeonBGM.currentTime = 0; }
+
+  setPlayerButtons(true); // 버튼 다시 활성화 (팝업 닫기 전까지는 의미 없음)
+  showDungeonResultPopup(); // ★ 결과 팝업 표시
+  // setTimeout 제거, 화면 전환은 팝업 닫을 때
+}
+
+
+
+
+/* 수정: 몬스터 처치 (보상 누적) */
+function winBattle() {
+  battleMsg("몬스터 처치!");
+  playSound('monsterwin.mp3');
+  setPlayerButtons(false);
+
+// ▼▼▼ [도감 등록 로직 추가] ▼▼▼
+  // 현재 몬스터 이미지가 도감에 없고, 도감이 꽉 차지 않았다면 추가
+  if (!player.monsterBook.includes(monster.img)) {
+      if (player.monsterBook.length < 30) {
+          player.monsterBook.push(monster.img);
+          battleMsg(`📖 도감에 새 몬스터가 등록되었습니다!`);
+          saveToLocal(); // 저장
+      }
+  }
+  // ▲▲▲ 여기까지 추가 ▲▲▲
+
+  const rewardCoins = 100 * monster.level;
+  const rewardXp = 50 * monster.level;
+
+  // ★ 결과 객체에 누적
+  if (dungeonRunStats) {
+      dungeonRunStats.defeatedMonsters.push(`Lv.${monster.level}`);
+      dungeonRunStats.gainedXp += rewardXp;
+      dungeonRunStats.gainedCoins += rewardCoins;
+  }
+
+  battleMsg(`(임시) 코인 +${rewardCoins}, XP +${rewardXp}`); // 임시 로그
+
+  // checkLevelUp(); // ★ 즉시 레벨업 X
+  // renderPlayer(); // ★ 즉시 반영 X
+
+  player.dungeonLevel++;
+  if (player.dungeonLevel > 25) {
+    battleMsg("🎉 모든 던전 클리어!");
+    player.dungeonLevel = 1; // 루프 (결과 팝업 후 초기화될 수도 있음)
+    // ★ 여기서 바로 startBattle 대신 결과 팝업을 띄우는 로직 추가 가능
+    // showDungeonResultPopup();
+    // return;
+  }
+
+  setTimeout(startBattle, 1500); // 다음 전투 시작
+}
+
+/* 수정: 게임 오버 (사망 플래그, 결과 팝업 호출) */
+function gameOver(){
+  battleMsg("패배... 홈으로 이동.");
+  setPlayerButtons(false);
+  playSound('monsterlose.mp3');
+  playerDiedInDungeon = true; // ★ 사망 플래그 설정
+
+  if (dungeonBGM) { dungeonBGM.pause(); dungeonBGM.currentTime = 0; }
+
+  // HP/MP 복구는 결과 확인 후 applyDungeonRewards에서 처리
+  // const totalMaxHp = ... ; player.hp = restoreHp; ... -> 제거
+
+  showDungeonResultPopup(); // ★ 결과 팝업 표시
+  // setTimeout 제거
+}
+
+
+function showDungeonResultPopup() {
+  if (!dungeonRunStats) return; // 데이터 없으면 표시 안 함
+
+  const defeatedMonstersEl = document.getElementById("defeatedMonstersResult");
+  const levelChangeEl = document.getElementById("levelChangeResult");
+  const coinsGainedEl = document.getElementById("coinsGainedResult");
+
+  // 임시로 XP 더해서 레벨업 계산해보기 (실제 적용은 나중에)
+  let tempPlayer = { ...player, xp: player.xp + dungeonRunStats.gainedXp };
+  let finalLevel = tempPlayer.level;
+  let levelUpCount = 0;
+  let need = getNextExp(tempPlayer.level);
+  while (tempPlayer.xp >= need) {
+      tempPlayer.xp -= need;
+      finalLevel++;
+      levelUpCount++;
+      need = getNextExp(finalLevel);
+  }
+  dungeonRunStats.levelUps = levelUpCount; // 레벨업 횟수 저장
+
+  // 내용 채우기
+  defeatedMonstersEl.textContent = dungeonRunStats.defeatedMonsters.join(', ') || '없음';
+  levelChangeEl.textContent = `Lv.${dungeonRunStats.startLevel} → Lv.${finalLevel} (EXP +${dungeonRunStats.gainedXp})`;
+  coinsGainedEl.textContent = dungeonRunStats.gainedCoins.toLocaleString();
+
+  // 모달 표시
+  dungeonResultModal.style.display = "flex";
+}
+
+function closeDungeonResultPopup() {
+  playSound('click.mp3'); // 확인 버튼 효과음
+  dungeonResultModal.style.display = "none";
+
+  applyDungeonRewards(); // ★ 보상 적용
+
+// ★★★ 수정된 부분 ★★★
+  // "나의 정보" 탭(window-info)으로 강제 이동
+  const homeButton = document.querySelector('.nav-btn[data-target="window-info"]');
+  if (homeButton) {
+      homeButton.click(); // '나의 정보' 버튼을 강제로 클릭
+  }
+  renderPlayer(); // 최종 상태 렌더링
+}
+
+function applyDungeonRewards() {
+  if (!dungeonRunStats) return;
+
+  log("던전 결과 적용:");
+  log(`- 획득 XP: ${dungeonRunStats.gainedXp}`);
+  log(`- 획득 코인: ${dungeonRunStats.gainedCoins}`);
+
+  player.xp += dungeonRunStats.gainedXp;
+  player.coins += dungeonRunStats.gainedCoins;
+
+  // 레벨업 처리 (checkLevelUp은 내부에서 renderPlayer 호출함)
+  checkLevelUp();
+
+  // 사망 시 HP/MP 복구
+  if (playerDiedInDungeon) {
+    log("전투 패배로 HP/MP가 절반 회복됩니다.");
+// ▼▼▼ [수정] 장비 스탯까지 포함한 '진짜 최대 체력/마나' 계산 ▼▼▼
+    const t = shopTops.find(x=>x.id===player.equippedTop);
+    const b = shopBottoms.find(x=>x.id===player.equippedBottom);
+    
+    const totalMaxHp = player.maxHp + (t? t.hp : 0) + getTitleStatBonus('hp');
+    const totalMaxMp = player.maxMp + (b? b.mp : 0) + getTitleStatBonus('mp');
+    // ▲▲▲ 여기까지 수정 ▲▲▲
+    player.hp = Math.max(1, Math.floor(totalMaxHp * 0.5));
+    player.mp = Math.max(1, Math.floor(totalMaxMp * 0.5));
+    playerDiedInDungeon = false; // 플래그 리셋
+    renderPlayer(); // HP/MP 복구 후 다시 렌더링
+  }
+
+  saveToLocal(); // 최종 결과 저장
+  dungeonRunStats = null; // 결과 데이터 리셋
+}
+/* ▲▲▲ 던전 결과 함수 끝 ▲▲▲ */
+
+
+/* ====================================
+   5-5. 일일 미션 탭 - 새 기능 함수들
+   ==================================== */
+
+let donutChartInstance = null;
+let pieChartInstance = null;
+let currentCalendarDate = new Date(); // 달력 표시용 현재 날짜
+
+// --- 1. 차트 렌더링 함수 ---
+function renderDailyCharts() {
+    const doneCount = missions.filter(m => m.done).length;
+    
+    // ★ 상단 '진행도' 도넛 차트
+    document.getElementById("donut-chart-text").textContent = `${doneCount}/12`;
+    document.getElementById("all-clear-count").textContent = player.allClear;
+    
+    const donutCtx = document.getElementById('donutChart').getContext('2d');
+    const donutData = {
+        datasets: [{
+            data: [doneCount, 12 - doneCount],
+            backgroundColor: ['#4caf50', '#e0e0e0'], // (초록색, 회색)
+            borderWidth: 0,
+        }]
+    };
+    if (donutChartInstance) {
+        donutChartInstance.data = donutData;
+        donutChartInstance.update();
+    } else {
+        donutChartInstance = new Chart(donutCtx, {
+            type: 'doughnut',
+            data: donutData,
+            options: { cutout: '80%', responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+        });
+    }
+
+    // ★ 하단 '카테고리 비율' 원 그래프
+    const pieCtx = document.getElementById('pieChart').getContext('2d');
+    const catData = player.missionCountsByCategory;
+    const catColors = { exercise: '#c8a2c8', study: '#a0c4ff', diet: '#ffadad', rest: '#b0d9b1' }; // (보라, 파랑, 빨강, 초록)
+    const pieData = {
+        labels: ['운동', '공부', '식단', '휴식'],
+        datasets: [{
+            data: [catData.exercise, catData.study, catData.diet, catData.rest],
+            backgroundColor: [catColors.exercise, catColors.study, catColors.diet, catColors.rest],
+            borderWidth: 1
+        }]
+    };
+    if (pieChartInstance) {
+        pieChartInstance.data = pieData;
+        pieChartInstance.update();
+    } else {
+        pieChartInstance = new Chart(pieCtx, {
+            type: 'pie',
+            data: pieData,
+            options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } } }
+        });
+    }
+
+    // ★ 하단 '카테고리 범례'
+    const legendEl = document.getElementById("pie-legend");
+    legendEl.innerHTML = `
+        <div class="legend-item"><div class="legend-color-box" style="background-color:${catColors.exercise}"></div> 운동: ${catData.exercise}</div>
+        <div class="legend-item"><div class="legend-color-box" style="background-color:${catColors.study}"></div> 공부: ${catData.study}</div>
+        <div class="legend-item"><div class="legend-color-box" style="background-color:${catColors.diet}"></div> 식단: ${catData.diet}</div>
+        <div class="legend-item"><div class="legend-color-box" style="background-color:${catColors.rest}"></div> 휴식: ${catData.rest}</div>
+    `;
+}
+
+// --- 2. 달력 렌더링 함수 ---
+function renderCalendar(date) {
+    const calendarBody = document.getElementById('mission-calendar-body');
+    const monthYearEl = document.getElementById('cal-month-year');
+    calendarBody.innerHTML = "";
+    
+    const year = date.getFullYear();
+    const month = date.getMonth(); // 0-11
+    
+    monthYearEl.textContent = `${year} / ${String(month + 1).padStart(2, '0')}`;
+    
+    const firstDay = new Date(year, month, 1).getDay(); // 0=일, 1=월 ...
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    
+    let day = 1;
+    for (let i = 0; i < 6; i++) { // 6주
+        const row = document.createElement('tr');
+        for (let j = 0; j < 7; j++) { // 7일
+            const cell = document.createElement('td');
+            if (i === 0 && j < firstDay) {
+                // 이전 달 (빈 칸)
+                cell.classList.add('other-month');
+            } else if (day > daysInMonth) {
+                // 다음 달 (빈 칸)
+                cell.classList.add('other-month');
+            } else {
+                // 현재 달
+                const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const count = player.dailyHistory[dateString] || 0;
+                
+                let content = `<div class="day-number">${day}</div>`;
+                if (count === 12) {
+                    content += `<img src="images/icon7.png" class="day-count-icon" alt="All Clear">`;
+                } else if (count > 0) {
+                    content += `<div class="day-count">${count}</div>`;
+                }
+                cell.innerHTML = content;
+                day++;
+            }
+            row.appendChild(cell);
+        }
+        calendarBody.appendChild(row);
+        if (day > daysInMonth) break; // 월의 마지막 날을 넘기면 중단
+    }
+}
+
+
+/* ====================================
+   미션 수정 기능 (신규)
+   ==================================== */
+
+// 1. 커스텀 미션 불러오기 (초기화 시 실행)
+function loadCustomMissions() {
+    const stored = localStorage.getItem("rl_custom_missions_v2");
+    if (stored) {
+        try {
+            const custom = JSON.parse(stored);
+            // 기존 missionPools에 덮어쓰기
+            for (let key in custom) {
+                if (missionPools[key]) {
+                    missionPools[key].fixed = custom[key].fixed || missionPools[key].fixed;
+                    missionPools[key].random = custom[key].random || missionPools[key].random;
+                }
+            }
+            console.log("커스텀 미션 데이터 로드 완료");
+        } catch (e) { console.error("커스텀 미션 로드 실패", e); }
+    }
+}
+
+// 2. 미션 수정 테이블 그리기 (탭 클릭 시 실행)
+function renderMissionEditTable() {
+    const tbody = document.querySelector("#editMissionTable tbody");
+    tbody.innerHTML = "";
+
+    for (const key in missionPools) {
+        const category = missionPools[key];
+        
+        // 카테고리 헤더 행
+        const catRow = document.createElement("tr");
+        catRow.innerHTML = `<td colspan="3" style="background:#e3f2fd; font-weight:bold; text-align:center; padding:8px;">[ ${category.name} ]</td>`;
+        tbody.appendChild(catRow);
+
+        // 정규 미션 목록
+        category.fixed.forEach((mission, index) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td style="text-align:center;">정규</td>
+                <td>${mission}</td>
+                <td><input type="text" class="edit-mission-input" data-cat="${key}" data-type="fixed" data-idx="${index}" value="${mission}" style="width:95%; padding:5px;"></td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        // 랜덤 미션 목록
+        category.random.forEach((mission, index) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td style="text-align:center; color:#666;">랜덤</td>
+                <td>${mission}</td>
+                <td><input type="text" class="edit-mission-input" data-cat="${key}" data-type="random" data-idx="${index}" value="${mission}" style="width:95%; padding:5px;"></td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+}
+
+// 3. 미션 저장하기 (저장 버튼 클릭 시 실행)
+function saveMissionEdits() {
+    const inputs = document.querySelectorAll(".edit-mission-input");
+    
+    // 현재 missionPools를 복사해서 업데이트
+    inputs.forEach(input => {
+        const cat = input.dataset.cat;
+        const type = input.dataset.type;
+        const idx = input.dataset.idx;
+        const val = input.value.trim();
+        
+        if (val) {
+            missionPools[cat][type][idx] = val;
+        }
+    });
+
+    // 로컬 스토리지에 저장
+    localStorage.setItem("rl_custom_missions_v2", JSON.stringify(missionPools));
+    
+    alert("미션 내용이 수정되었습니다.\n변경된 미션은 '다음 날'부터 적용됩니다.");
+    
+    // (선택) UI 즉시 반영을 위해 테이블 다시 그리기
+    renderMissionEditTable();
+}
+
+// ▼▼▼ 도감 렌더링 함수 (신규) ▼▼▼
+function renderMonsterBook() {
+    const grid = document.getElementById('monster-book-grid');
+    const countSpan = document.getElementById('book-collection-count');
+    grid.innerHTML = "";
+    
+    countSpan.textContent = player.monsterBook.length;
+
+    // 5x6 = 30칸 생성
+    for (let i = 0; i < 30; i++) {
+        const slot = document.createElement('div');
+        slot.className = 'book-slot';
+
+        if (i < player.monsterBook.length) {
+            // 수집된 몬스터 표시
+            const img = document.createElement('img');
+            img.src = player.monsterBook[i];
+            slot.appendChild(img);
+            // (선택사항) 클릭 시 정보 보기 등을 추가할 수 있음
+            slot.title = "수집됨";
+        } else {
+            // 빈 칸 표시
+            slot.className += ' empty';
+        }
+        grid.appendChild(slot);
+    }
+}
+
+// ▼▼▼ 인벤토리 렌더링 함수 (수정됨: 장비 클릭 시 장착) ▼▼▼
+function renderInventory(category) {
+    // 1. 탭 버튼 스타일 갱신
+    const buttons = document.querySelectorAll('.inv-cat-btn');
+    buttons.forEach(btn => {
+        if (btn.textContent === getCategoryName(category)) btn.classList.add('active');
+        else btn.classList.remove('active');
+    });
+
+    const grid = document.getElementById('inventory-grid');
+    grid.innerHTML = "";
+
+    let itemsToShow = [];
+
+    // 2. 카테고리별 아이템 데이터 수집
+    if (category === 'consumable') {
+        // 소비 아이템
+        if ((player.potions || 0) > 0) {
+            itemsToShow.push({ img: 'images/bottle.png', count: player.potions, name: 'HP 물약' });
+        }
+        if ((player.mpPotions || 0) > 0) {
+            itemsToShow.push({ img: 'images/bottle2.png', count: player.mpPotions, name: 'MP 물약' });
+        }
+    } else {
+        // 장비 아이템
+        let ownedIds = [];
+        let sourceData = [];
+
+        if (category === 'weapon') { ownedIds = player.ownedWeapons; sourceData = shopWeapons; }
+        else if (category === 'top') { ownedIds = player.ownedTops; sourceData = shopTops; }
+        else if (category === 'bottom') { ownedIds = player.ownedBottoms; sourceData = shopBottoms; }
+        else if (category === 'shield') { ownedIds = player.ownedShields; sourceData = shopShields; }
+
+        // 보유한 ID에 해당하는 아이템 정보 찾기
+        // ★★★ [수정] item.id도 함께 저장하도록 변경 ★★★
+        itemsToShow = ownedIds.map(id => {
+            const item = sourceData.find(data => data.id === id);
+            return item ? { id: item.id, img: item.shopImg || item.img, name: item.name } : null;
+        }).filter(item => item !== null); 
+    }
+
+    // 3. 7x10 = 70칸 생성 및 채우기
+    for (let i = 0; i < 70; i++) {
+        const slot = document.createElement('div');
+        slot.className = 'inv-slot';
+
+        // 아이템이 있으면 이미지 표시
+        if (i < itemsToShow.length) {
+            const item = itemsToShow[i];
+            const img = document.createElement('img');
+            img.src = item.img;
+            img.alt = item.name;
+            img.title = item.name; 
+            slot.appendChild(img);
+
+            // 개수가 있다면(소비 아이템) 배지 표시
+            if (item.count !== undefined) {
+                const badge = document.createElement('span');
+                badge.className = 'inv-count-badge';
+                badge.textContent = item.count;
+                slot.appendChild(badge);
+            } 
+            // ★★★ [추가] 소비 아이템이 아니면(장비면) 클릭 시 장착 ★★★
+            else {
+                slot.style.cursor = "pointer"; // 클릭 커서로 변경
+                slot.onclick = () => {
+                    equipItem(category, item.id); // 기존 장착 함수 호출
+                    // (equipItem 함수 내부에 renderPlayer, saveToLocal이 포함되어 있어 즉시 반영됩니다)
+                };
+            }
+        }
+
+        grid.appendChild(slot);
+    }
+}
+
+// (헬퍼 함수: 영문 카테고리를 한글로)
+function getCategoryName(cat) {
+    if (cat === 'weapon') return '무기';
+    if (cat === 'top') return '상의';
+    if (cat === 'bottom') return '하의';
+    if (cat === 'shield') return '방패';
+    if (cat === 'consumable') return '소비';
+    return '';
+}
+
+
+
+/* ------------------------
+   초기화
+   ------------------------ */
+function init(){
+	loadCustomMissions();
+    loadFromLocal(false); 
+    renderMissions(); // ★ 이 안에서 renderDailyCharts()가 호출됨
+    renderPlayer(); 
+    updateExpUI();
+    renderSkillList(); 
+    renderTitleList(); 
+    renderCalendar(currentCalendarDate); // ★ 달력 최초 렌더링
+    
+    document.getElementById("info-slot-top").addEventListener("click", openEquipmentWindow);
+    document.getElementById("info-slot-bottom").addEventListener("click", openEquipmentWindow);
+    document.getElementById("info-slot-weapon").addEventListener("click", openEquipmentWindow);
+    document.getElementById("info-slot-shield").addEventListener("click", openEquipmentWindow);
+
+    document.getElementById("resetBtn").addEventListener("click", resetMissionsForAdmin);
+    document.getElementById("totalResetBtn").addEventListener("click", totalReset);
+    log("게임 시작. sounds/ 폴더에 효과음 파일을 넣어주세요.");
+}
+
+/* ------------------------
+   모달 닫기 처리
+   ------------------------ */
+document.getElementById("equipmentModal").addEventListener("click", (e)=>{ if(e.target === equipmentModal) closeEquipmentWindow(); }); // ★ 추가
+
+init();
+</script>
+
+
+
+</body>
+</html>
