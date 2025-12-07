@@ -3165,9 +3165,9 @@ function investStat(type) {
 }
 
 
-// ▼▼▼ function renderPlayer() { ... }의 내용물 전체를 이걸로 교체! ▼▼▼
+// ▼▼▼ renderPlayer 함수 전체 수정 ▼▼▼
 function renderPlayer(){
-    // --- 1. 스탯 계산 (기존과 동일) ---
+    // --- 1. 스탯 계산 ---
     const w = shopWeapons.find(x=>x.id===player.weapon) || shopWeapons[0];
     const t = shopTops.find(x=>x.id===player.equippedTop);
     const b = shopBottoms.find(x=>x.id===player.equippedBottom);
@@ -3194,19 +3194,14 @@ function renderPlayer(){
     if (player.hp > totalMaxHp) player.hp = totalMaxHp;
     if (player.mp > totalMaxMp) player.mp = totalMaxMp;
 
-    // --- 2. 새 UI 업데이트 로직 ---
-
-    // 8. 코인 (새 ID)
+    // --- 2. UI 업데이트 ---
     document.getElementById("info-coin-text").textContent = player.coins.toLocaleString();
-
-    // 7. 하단 스탯 (ID 재사용)
     document.getElementById("hpTextMain").textContent = `${player.hp}/${totalMaxHp}`;
     document.getElementById("mpTextMain").textContent = `${player.mp}/${totalMaxMp}`;
     document.getElementById("atkText").textContent = totalAtk;
     document.getElementById("defText").textContent = totalDef;
     document.getElementById("critText").textContent = totalCrit.toFixed(1) + "%";
 
-    // 5. 레벨/이름 (ID 재사용)
     let playerTitle;
     if (player.level <= 10) { playerTitle = "초보자"; }
     else if (player.level <= 20) { playerTitle = "정예자"; }
@@ -3214,26 +3209,25 @@ function renderPlayer(){
     else { playerTitle = "마스터"; }
     document.getElementById("levelTag").textContent = `Lv.${player.level} ${playerTitle}`;
     
-// ▼▼▼ [추가] 칭호 표시 로직 복구 ▼▼▼
     const equippedTitleDisplay = document.getElementById("equippedTitleDisplay");
     if (player.equippedTitle && titles[player.equippedTitle]) {
         equippedTitleDisplay.textContent = titles[player.equippedTitle].name;
     } else {
-        equippedTitleDisplay.textContent = ""; // 장착 안 했으면 빈카
+        equippedTitleDisplay.textContent = "";
     }
-    // ▲▲▲ 여기까지 추가 ▲▲▲
 
-    // 1. 캐릭터 이미지 (ID 재사용)
-    let charImg = 'char_1.png'; // 1-10
+    // ★★★ 이미지 경로 수정 (없는 장비는 빈 칸으로) ★★★
+    let charImg = 'char_1.png'; 
     if (player.level >= 11 && player.level <= 20) charImg = 'char_2.png';
     else if (player.level >= 21 && player.level <= 30) charImg = 'char_3.png';
     else if (player.level >= 31) charImg = 'char_4.png';
     
     const basePath = `images/${charImg}`;
-    const weaponPath = player.weapon ? `images/weapon_${player.weapon}.png` : 'images/char_0.png';
-    const topPath = player.equippedTop ? `images/top_${player.equippedTop}.png` : 'images/top_0.png';
-    const bottomPath = player.equippedBottom ? `images/bottom_${player.equippedBottom}.png` : 'images/bottom_0.png';
-    const shieldPath = player.equippedShield ? `images/shield_${player.equippedShield}.png` : 'images/shield_0.png';
+    // (수정됨) 장비가 없으면 '_0.png'가 아니라 ''(빈값)을 넣습니다.
+    const weaponPath = player.weapon ? `images/weapon_${player.weapon}.png` : '';
+    const topPath = player.equippedTop ? `images/top_${player.equippedTop}.png` : '';
+    const bottomPath = player.equippedBottom ? `images/bottom_${player.equippedBottom}.png` : '';
+    const shieldPath = player.equippedShield ? `images/shield_${player.equippedShield}.png` : '';
 
     document.getElementById('charLayer_Base').src = basePath;
     document.getElementById('charLayer_Weapon').src = weaponPath;
@@ -3241,7 +3235,7 @@ function renderPlayer(){
     document.getElementById('charLayer_Bottom').src = bottomPath;
     document.getElementById('charLayer_Shield').src = shieldPath;
 
-    // (장비창 팝업이 열려있을 때 업데이트하는 로직 - 기존과 동일)
+    // 장비창 팝업 업데이트
     if (equipmentModal.style.display === "flex") {
         document.getElementById('equipLayer_Base').src = basePath;
         document.getElementById('equipLayer_Weapon').src = weaponPath;
@@ -3249,25 +3243,21 @@ function renderPlayer(){
         document.getElementById('equipLayer_Bottom').src = bottomPath;
         document.getElementById('equipLayer_Shield').src = shieldPath;
 
-
         document.getElementById('equipSlot_Top').style.backgroundImage = t ? `url('${t.shopImg}')` : 'none';
         document.getElementById('equipSlot_Bottom').style.backgroundImage = b ? `url('${b.shopImg}')` : 'none';
         document.getElementById('equipSlot_Weapon').style.backgroundImage = w ? `url('${w.shopImg}')` : 'none';
         document.getElementById('equipSlot_Shield').style.backgroundImage = s ? `url('${s.shopImg}')` : 'none';
-
     }
 
-    // 2. 장비 슬롯 (새 ID)
+    // 슬롯 업데이트
     document.getElementById('info-slot-top').style.backgroundImage = t ? `url('${t.shopImg}')` : 'none';
     document.getElementById('info-slot-bottom').style.backgroundImage = b ? `url('${b.shopImg}')` : 'none';
     document.getElementById('info-slot-weapon').style.backgroundImage = w ? `url('${w.shopImg}')` : 'none';
     document.getElementById('info-slot-shield').style.backgroundImage = s ? `url('${s.shopImg}')` : 'none';
 
-    // 3. 물약 슬롯 (새 ID)
     document.getElementById('info-potion-count').textContent = player.potions || 0;
     document.getElementById('info-mp-potion-count').textContent = player.mpPotions || 0;
 
-    // 4. 스킬 슬롯 (새 ID)
     const skillSlotsIds = ['info-skill-1', 'info-skill-2', 'info-skill-3', 'info-skill-4', 'info-skill-5'];
     const unlocked = player.unlockedSkills.map(id => commonSkills[id]);
 
@@ -3283,17 +3273,12 @@ function renderPlayer(){
         }
     });
 	
-// ▼▼▼ 스탯 포인트 UI 갱신 (신규) ▼▼▼
     document.getElementById("spDisplay").textContent = `SP: ${player.statPoints}`;
-    
     const statButtons = document.querySelectorAll('.stat-up-btn');
     statButtons.forEach(btn => {
-        // 포인트가 있으면 활성화(disabled=false), 없으면 비활성화(disabled=true)
         btn.disabled = (player.statPoints <= 0);
     });
-    // ▲▲▲ 여기까지 추가 ▲▲▲
 }
-
 
 
 
@@ -4095,9 +4080,9 @@ function startPlayerTurn() {
 
 
 /* 수정: 던전 입장 (BGM 오류 처리 강화) */
+// ▼▼▼ startBattle 함수 전체 수정 ▼▼▼
 function startBattle(){
  try {
-  // (기존 DOM 요소들)
   const playerImg = document.getElementById("playerImg"); const playerEffect = document.getElementById("playerEffect");
   const monImg = document.getElementById("monImg"); const monsterEffect = document.getElementById("monsterEffect");
   const pHpFill = document.getElementById("pHpFill"); const pMpFill = document.getElementById("pMpFill"); const mHpFill = document.getElementById("mHpFill");
@@ -4108,40 +4093,36 @@ function startBattle(){
   const commonSkillBtn1 = document.getElementById("commonSkillBtn1");
   const commonSkillBtn2 = document.getElementById("commonSkillBtn2");
   const commonSkillBtn3 = document.getElementById("commonSkillBtn3");
-  const commonSkillBtn4 = document.getElementById("commonSkillBtn4"); // ✅ 4번 버튼
-  const commonSkillBtn5 = document.getElementById("commonSkillBtn5"); // ✅ 5번 버튼
+  const commonSkillBtn4 = document.getElementById("commonSkillBtn4"); 
+  const commonSkillBtn5 = document.getElementById("commonSkillBtn5"); 
   const battleLog = document.getElementById("battleLog");
 
-  // ★ [새 구조] 프로필 사진 DOM 요소 추가
   const playerImgProfile = document.getElementById("playerImg_profile");
   const monImgProfile = document.getElementById("monImg_profile");
 
   const attackHandler = () => handleAttack(); const hpPotionHandler = () => handleHpPotion(); const mpPotionHandler = () => handleMpPotion();
   const skill1Handler = () => handleSkill1(); const skill2Handler = () => handleSkill2(); const skill3Handler = () => handleSkill3(); 
-  const skill4Handler = () => handleSkill4(); // ✅ 4번 핸들러
-  const skill5Handler = () => handleSkill5(); // ✅ 5번 핸들러 
+  const skill4Handler = () => handleSkill4(); 
+  const skill5Handler = () => handleSkill5(); 
   const escapeHandler = () => handleEscape();
 
-  // (기존 리스너 제거 로직 - Btn4, 5는 리스너가 없으므로 놔둠)
   if (attackBtn._clickHandler) attackBtn.removeEventListener("click", attackBtn._clickHandler); if (potionBtn._clickHandler) potionBtn.removeEventListener("click", potionBtn._clickHandler);
   if (mpPotionBtn._clickHandler) mpPotionBtn.removeEventListener("click", mpPotionBtn._clickHandler); if (commonSkillBtn1._clickHandler) commonSkillBtn1.removeEventListener("click", commonSkillBtn1._clickHandler);
   if (commonSkillBtn2._clickHandler) commonSkillBtn2.removeEventListener("click", commonSkillBtn2._clickHandler); if (commonSkillBtn3._clickHandler) commonSkillBtn3.removeEventListener("click", commonSkillBtn3._clickHandler);
-  if (commonSkillBtn4._clickHandler) commonSkillBtn4.removeEventListener("click", commonSkillBtn4._clickHandler); // ✅ 4번 리스너 제거
-  if (commonSkillBtn5._clickHandler) commonSkillBtn5.removeEventListener("click", commonSkillBtn5._clickHandler); // ✅ 5번 리스너 제거
+  if (commonSkillBtn4._clickHandler) commonSkillBtn4.removeEventListener("click", commonSkillBtn4._clickHandler); 
+  if (commonSkillBtn5._clickHandler) commonSkillBtn5.removeEventListener("click", commonSkillBtn5._clickHandler); 
   if (escapeBtn._clickHandler) escapeBtn.removeEventListener("click", escapeBtn._clickHandler);
 
-  // (기존 리스너 연결 로직 - Btn4, 5는 놔둠)
   if(attackBtn) { attackBtn.addEventListener("click", attackHandler); attackBtn._clickHandler = attackHandler; }
   if(potionBtn) { potionBtn.addEventListener("click", hpPotionHandler); potionBtn._clickHandler = hpPotionHandler; }
   if(mpPotionBtn) { mpPotionBtn.addEventListener("click", mpPotionHandler); mpPotionBtn._clickHandler = mpPotionHandler; }
   if(commonSkillBtn1) { commonSkillBtn1.addEventListener("click", skill1Handler); commonSkillBtn1._clickHandler = skill1Handler; }
   if(commonSkillBtn2) { commonSkillBtn2.addEventListener("click", skill2Handler); commonSkillBtn2._clickHandler = skill2Handler; }
   if(commonSkillBtn3) { commonSkillBtn3.addEventListener("click", skill3Handler); commonSkillBtn3._clickHandler = skill3Handler; }
-  if(commonSkillBtn4) { commonSkillBtn4.addEventListener("click", skill4Handler); commonSkillBtn4._clickHandler = skill4Handler; } // ✅ 4번 리스너 연결
-  if(commonSkillBtn5) { commonSkillBtn5.addEventListener("click", skill5Handler); commonSkillBtn5._clickHandler = skill5Handler; } // ✅ 5번 리스너 연결
+  if(commonSkillBtn4) { commonSkillBtn4.addEventListener("click", skill4Handler); commonSkillBtn4._clickHandler = skill4Handler; } 
+  if(commonSkillBtn5) { commonSkillBtn5.addEventListener("click", skill5Handler); commonSkillBtn5._clickHandler = skill5Handler; } 
   if(escapeBtn) { escapeBtn.addEventListener("click", escapeHandler); escapeBtn._clickHandler = escapeHandler; }
 
-  // (던전 레벨 및 배경 설정)
   if(typeof player.dungeonLevel !== 'number' || player.dungeonLevel < 1) player.dungeonLevel = 1; if(player.dungeonLevel > 25) player.dungeonLevel = 25;
   const level = player.dungeonLevel;
   let bgImage = 'images/dungeonbackground1.png';
@@ -4151,7 +4132,6 @@ function startBattle(){
   else if (level >= 25) bgImage = 'images/dungeonbackground5.png';
   document.getElementById('window-dungeon').style.backgroundImage = `url('${bgImage}')`;
 
-  // (몬스터 스탯 설정 - 기존과 동일)
   monster.level = level;
   let hp, atk, def, crit;
   if (level <= 10) { hp = 20 + (level * 15); atk = 3 + (level * 2); def = 0 + level; crit = 0; }
@@ -4159,35 +4139,31 @@ function startBattle(){
   else { const p = 1.4, pl24 = 14; const bHp=Math.floor((170)*Math.pow(p, pl24)); const bAtk=Math.floor((23)*Math.pow(p, pl24)); const bDef=Math.floor((10)*Math.pow(p, pl24)); const bCrit=10 + (pl24 * 5); hp=Math.floor(bHp*2.2); atk=Math.floor(bAtk*2.0); def=Math.floor(bDef*1.5); crit=bCrit+15; battleMsg("!! 최종 보스 !!"); }
   if (level === 7 || level === 13 || level === 19) { const sm = 1.5; hp=Math.floor(hp*sm); atk=Math.floor(atk*sm); def=Math.floor(def*sm); battleMsg("!! 강력 !!"); }
   monster.maxHp = hp; monster.hp = hp; monster.atk = atk; monster.def = def; monster.crit = crit; monster.img = `images/mon${level}.png`;
-  // ✅ 버프/디버프/쿨다운 초기화
-  playerBuffs = { focus: false, awakened: false }; // ✅ 'awakened' 추가
-  monsterDebuffs = { stunned: 0, poison: 0 }; // ✅ 'poison' 추가
-  player.skillCooldowns = { skill4: 0, skill5: 0 }; // ✅ 쿨다운 초기화
+  
+  playerBuffs = { focus: false, awakened: false }; 
+  monsterDebuffs = { stunned: 0, poison: 0 }; 
+  player.skillCooldowns = { skill4: 0, skill5: 0 }; 
   startPlayerTurn();
 
-  // ★ 몬스터 이미지 (큰 것 + 프로필) 설정
   if (monImg) monImg.style.backgroundImage = `url('${monster.img}')`;
-  if (monImgProfile) monImgProfile.style.backgroundImage = `url('${monster.img}')`; // ★ 추가
+  if (monImgProfile) monImgProfile.style.backgroundImage = `url('${monster.img}')`; 
   
   if (pLvText) pLvText.textContent = player.level; if (mLvText) mLvText.textContent = level;
 
-
-
-
-  // ★ 플레이어 이미지 (큰 것 + 프로필) 설정
-  let charImg = 'char_1.png'; // 1-10 레벨 기본
+  // ★★★ 이미지 경로 수정 (없는 장비는 빈 칸으로) ★★★
+  let charImg = 'char_1.png'; 
   if (player.level >= 11 && player.level <= 20) charImg = 'char_2.png';
   else if (player.level >= 21 && player.level <= 30) charImg = 'char_3.png';
   else if (player.level >= 31) charImg = 'char_4.png';
 
   const basePath = `images/${charImg}`;
-  if (playerImgProfile) playerImgProfile.style.backgroundImage = `url('${basePath}')`; // ★ 추가
+  if (playerImgProfile) playerImgProfile.style.backgroundImage = `url('${basePath}')`; 
 
-  // (기존 5-Layer 로직)
-  const weaponPath = player.weapon ? `images/weapon_${player.weapon}.png` : 'images/char_0.png';
-  const topPath = player.equippedTop ? `images/top_${player.equippedTop}.png` : 'images/top_0.png';
-  const bottomPath = player.equippedBottom ? `images/bottom_${player.equippedBottom}.png` : 'images/bottom_0.png';
-  const shieldPath = player.equippedShield ? `images/shield_${player.equippedShield}.png` : 'images/shield_0.png';
+  // (수정됨) 장비가 없으면 '_0.png'가 아니라 ''(빈값)을 넣습니다.
+  const weaponPath = player.weapon ? `images/weapon_${player.weapon}.png` : '';
+  const topPath = player.equippedTop ? `images/top_${player.equippedTop}.png` : '';
+  const bottomPath = player.equippedBottom ? `images/bottom_${player.equippedBottom}.png` : '';
+  const shieldPath = player.equippedShield ? `images/shield_${player.equippedShield}.png` : '';
   
   document.getElementById('dungeonLayer_Base').src = basePath;
   document.getElementById('dungeonLayer_Weapon').src = weaponPath;
@@ -4195,15 +4171,11 @@ function startBattle(){
   document.getElementById('dungeonLayer_Bottom').src = bottomPath;
   document.getElementById('dungeonLayer_Shield').src = shieldPath;
 
-  // (UI 갱신 및 버튼 스타일 설정)
   updateBattleUI(); if(battleLog) battleLog.innerHTML = ""; battleMsg("전투 개시!");
   const w = shopWeapons.find(x=>x.id===player.weapon);
   if (attackBtn) { attackBtn.style.backgroundImage = w?`url('${w.shopImg}')`:''; attackBtn.textContent=''; }
   if (potionBtn) { potionBtn.style.backgroundImage = `url('images/bottle.png')`; potionBtn.textContent = `HP(${player.potions||0})`; }
   if (mpPotionBtn) { mpPotionBtn.style.backgroundImage = `url('images/bottle2.png')`; mpPotionBtn.textContent = `MP(${player.mpPotions||0})`;}
-  
-  // ★ escapeBtn 스타일링 코드는 삭제 (CSS가 처리)
-  // if (escapeBtn) { escapeBtn.style.backgroundImage = `url('images/exit.png')`; escapeBtn.textContent = '';}
   
   if (commonSkillBtn1) commonSkillBtn1.style.backgroundImage = player.unlockedSkills.includes('skill1')?`url('${commonSkills.skill1.img}')`:'none';
   if (commonSkillBtn2) commonSkillBtn2.style.backgroundImage = player.unlockedSkills.includes('skill2')?`url('${commonSkills.skill2.img}')`:'none';
