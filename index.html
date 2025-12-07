@@ -3794,6 +3794,15 @@ function loadFromLocal(showLog){
     if(player.weeklyCounts === undefined) player.weeklyCounts = { exercise: 0, study: 0, diet: 0, rest: 0 };
     if(player.monsterBook === undefined) player.monsterBook = [];
     if(player.statPoints === undefined) player.statPoints = 0;
+
+   // ▼▼▼ [추가] 초기화 후 보너스 플래그가 있으면 코인 지급 ▼▼▼
+    if (localStorage.getItem("rl_bonus_start") === "true") {
+        player.coins = 300000; // 30만 코인 지급
+        localStorage.removeItem("rl_bonus_start"); // 플래그 삭제 (일회용)
+        if(showLog) log("🎉 히든 리셋 보너스: 300,000 코인이 지급되었습니다!");
+    }
+    // ▲▲▲ 여기까지 추가 ▲▲▲
+	  
 	renderPlayer(); renderMissions(); renderWeeklyMissions(); 
     if(showLog) log("불러오기 완료.");
 
@@ -4819,8 +4828,11 @@ function init(){
     document.getElementById("info-slot-weapon").addEventListener("click", openEquipmentWindow);
     document.getElementById("info-slot-shield").addEventListener("click", openEquipmentWindow);
 
-    document.getElementById("resetBtn").addEventListener("click", resetMissionsForAdmin);
-    document.getElementById("totalResetBtn").addEventListener("click", totalReset);
+// ▼▼▼ [수정] 투명 버튼에 리셋 기능 연결 ▼▼▼
+    const hiddenBtn = document.getElementById("hiddenResetBtn");
+    if(hiddenBtn) {
+        hiddenBtn.addEventListener("click", totalReset);
+    }
     log("게임 시작. sounds/ 폴더에 효과음 파일을 넣어주세요.");
 }
 
