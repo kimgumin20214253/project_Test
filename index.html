@@ -2083,6 +2083,8 @@ font-family: 'Paperozi', "Malgun Gothic", sans-serif;
         <img src="images/icon5.png" alt="설정">
         
     </button>
+
+	<button id="hiddenResetBtn" style="width: 100%; height: 60px; background: transparent; border: none; cursor: default;" title="???"></button>
 </nav>
 
 <main id="main-content">
@@ -3706,12 +3708,21 @@ function saveToLocal(){
   }catch(e){ log("저장 실패: " + e.message); }
 }
 
+/* 수정된 전체 초기화 함수 */
 function totalReset(){
-  const isConfirmed = confirm("정말로 모든 데이터를 삭제하고 처음 상태로 되돌리시겠습니까?");
+  // 메시지 수정
+  const isConfirmed = confirm("모든 데이터를 초기화하고 '300,000 코인'을 받고 시작하시겠습니까?");
+  
   if(isConfirmed){
+    // 1. 기존 데이터 삭제
     localStorage.removeItem("rl_player_v2");
     localStorage.removeItem("rl_missions_v2");
-    localStorage.removeItem("rl_custom_missions_v2"); // 커스텀 미션도 삭제
+    localStorage.removeItem("rl_custom_missions_v2");
+
+    // 2. ★ 핵심: 보너스 지급 표시를 저장해둠 (새로고침 해도 남음)
+    localStorage.setItem("rl_bonus_start", "true");
+
+    // 3. 새로고침 (init 함수가 다시 실행됨)
     location.reload();
   }
 }
